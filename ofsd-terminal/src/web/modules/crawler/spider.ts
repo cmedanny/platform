@@ -1,6 +1,13 @@
-// The reading spider: a large body + 8 long legs (3 segments each) with 2-bone IK.
-// Feet plant on real word positions in the document and step in an
-// alternating tetrapod gait (L1 R2 L3 R4 / R1 L2 R3 L4).
+// The reading spider: a large body + 8 long legs (3 segments each).
+//
+// Gait: an alternating tetrapod (L1 R2 L3 R4 / R1 L2 R3 L4) driven by the
+// distance the body actually travels, so every stride matches the movement.
+// Each group swings for 40% of the cycle; the rest is stance, with a short
+// moment where all eight feet are down. Swinging feet land ahead of their
+// rest spot so the body passes over them, and they plant on real words.
+//
+// Legs: 2-bone IK (femur, tibia+metatarsus) with the knee always bent away
+// from the body, then a gentle second bend at the ankle.
 
 export interface Pt {
   x: number;
@@ -11,16 +18,18 @@ export type AnchorFn = (p: Pt, radius: number) => Pt | null;
 
 // Geometry at scale 1 (about a 250px leg span).
 const FEMUR = 58;
-const TIBIA = 66;
-const TARSUS = 22;
+const TIBIA = 64;
+const TARSUS = 26;
 const HIP_SIDE = 8;
+const STRIDE = 78; // body travel per full gait cycle
+const SWING = 0.4; // fraction of the cycle each group spends in the air
 
 // Per leg (front to back): rest angle from heading (deg), rest radius, hip offset along body.
 const LEGS = [
-  { ang: 34, rad: 120, hip: 9 },
-  { ang: 70, rad: 124, hip: 3 },
-  { ang: 112, rad: 120, hip: -3 },
-  { ang: 150, rad: 112, hip: -9 },
+  { ang: 36, rad: 114, hip: 9 },
+  { ang: 72, rad: 116, hip: 3 },
+  { ang: 112, rad: 112, hip: -3 },
+  { ang: 148, rad: 106, hip: -9 },
 ];
 
 interface Leg {
@@ -28,16 +37,20 @@ interface Leg {
   i: number;
   group: 0 | 1;
   foot: Pt;
+  /** swing progress 0..1, or -1 when planted */
+  s: number;
   from: Pt;
-  to: Pt;
-  t0: number;
-  dur: number;
-  stepping: boolean;
+  snap: Pt; // offset from the ideal landing spot to the nearest real word
+  /** time-based settle step (when the body is standing still) */
+  timed: boolean;
+  /** already stepped in the current swing window */
+  stepped: boolean;
 }
 
-const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 const rot = (x: number, y: number, a: number): Pt => ({ x: x * Math.cos(a) - y * Math.sin(a), y: x * Math.sin(a) + y * Math.cos(a) });
 const dist = (a: Pt, b: Pt) => Math.hypot(a.x - b.x, a.y - b.y);
+const frac = (v: number) => v - Math.floor(v);
 
 export class Spider {
   x = 0;
@@ -49,7 +62,9 @@ export class Spider {
   private vy = 0;
   private lastX = 0;
   private lastY = 0;
-  private turn: 0 | 1 = 0;
+  private lastHeading = Math.PI / 2;
+  private phase = 0;
+  private stillFor = 0;
   private legs: Leg[] = [];
   moving = 0; // 0..1, smoothed
 
@@ -71,7 +86,7 @@ export class Spider {
       LEGS.forEach((_, i) => {
         const foot = this.rest(side, i);
         const group = ((i + (side === 1 ? 0 : 1)) % 2) as 0 | 1;
-        this.legs.push({ side, i, group, foot, from: foot, to: foot, t0: 0, dur: 0, stepping: false });
+        this.legs.push({ side, i, group, foot, s: -1, from: foot, snap: { x: 0, y: 0 }, timed: false, stepped: false });
       });
   }
 
@@ -80,112 +95,131 @@ export class Spider {
     return { x: this.x + o.x, y: this.y + o.y };
   }
 
-  private rest(side: 1 | -1, i: number, lead = 0): Pt {
+  private rest(side: 1 | -1, i: number): Pt {
     const a = this.heading + side * (LEGS[i].ang * Math.PI) / 180;
     const h = this.hip(side, i);
-    // feet reach a little ahead in the direction of travel
-    let lx = this.vx * lead;
-    let ly = this.vy * lead;
-    const lm = Math.hypot(lx, ly);
-    const cap = 22 * this.scale;
-    if (lm > cap) {
-      lx *= cap / lm;
-      ly *= cap / lm;
-    }
     const r = LEGS[i].rad * this.scale;
-    return { x: h.x + Math.cos(a) * r + lx, y: h.y + Math.sin(a) * r + ly };
+    return { x: h.x + Math.cos(a) * r, y: h.y + Math.sin(a) * r };
   }
 
-  /** Front of the head (where the silk is drawn from). */
+  /** Where a swinging foot should land: ahead of rest along the direction of travel. */
+  private landing(l: Leg): Pt {
+    const r = this.rest(l.side, l.i);
+    const sp = Math.hypot(this.vx, this.vy);
+    if (sp < 1) return r;
+    const ahead = STRIDE * this.scale * (1 - SWING) * 0.5;
+    return { x: r.x + (this.vx / sp) * ahead, y: r.y + (this.vy / sp) * ahead };
+  }
+
+  /** Front of the head (where silk is shot from). */
   head(): Pt {
     const h = rot(20 * this.scale, 0, this.heading);
     return { x: this.x + h.x, y: this.y + h.y };
   }
 
-  update(dt: number, now: number, speed: number, anchor: AnchorFn | null, reduced: boolean) {
+  update(dt: number, _now: number, speed: number, anchor: AnchorFn | null, reduced: boolean) {
     const sdt = Math.max(dt, 1e-3);
-    const nvx = (this.x - this.lastX) / sdt;
-    const nvy = (this.y - this.lastY) / sdt;
-    this.vx += (nvx - this.vx) * Math.min(1, sdt * 8);
-    this.vy += (nvy - this.vy) * Math.min(1, sdt * 8);
+    const k = this.scale;
+    const mx = this.x - this.lastX;
+    const my = this.y - this.lastY;
+    this.vx += (mx / sdt - this.vx) * Math.min(1, sdt * 8);
+    this.vy += (my / sdt - this.vy) * Math.min(1, sdt * 8);
     this.lastX = this.x;
     this.lastY = this.y;
     const sp = Math.hypot(this.vx, this.vy);
-    this.moving += ((sp > 12 ? 1 : 0) - this.moving) * Math.min(1, sdt * 4);
+    this.moving += ((sp > 10 ? 1 : 0) - this.moving) * Math.min(1, sdt * 4);
     if (sp > 14) this.targetHeading = Math.atan2(this.vy, this.vx);
     let d = this.targetHeading - this.heading;
     d = Math.atan2(Math.sin(d), Math.cos(d));
-    this.heading += d * Math.min(1, sdt * (reduced ? 30 : 2.4));
+    this.heading += d * Math.min(1, sdt * (reduced ? 30 : 2.2));
+    const turned = Math.abs(Math.atan2(Math.sin(this.heading - this.lastHeading), Math.cos(this.heading - this.lastHeading)));
+    this.lastHeading = this.heading;
 
     if (reduced) {
       for (const l of this.legs) l.foot = this.rest(l.side, l.i);
       return;
     }
 
+    // Gait phase advances with distance walked (turning in place counts too).
+    const travel = Math.hypot(mx, my) + turned * 60 * k;
+    const dPhase = travel / (STRIDE * k);
+    this.phase += dPhase;
+    this.stillFor = sp < 6 ? this.stillFor + sdt : 0;
     const reach = this.reach;
-    const stepDur = Math.max(110, Math.min(260, 250 / Math.sqrt(speed)) - Math.min(90, sp / 4));
+
     for (const l of this.legs) {
-      if (!l.stepping) continue;
-      const t = Math.min(1, (now - l.t0) / l.dur);
-      const e = ease(t);
-      l.foot = { x: l.from.x + (l.to.x - l.from.x) * e, y: l.from.y + (l.to.y - l.from.y) * e };
-      if (t >= 1) {
-        l.stepping = false;
-        l.foot = l.to;
-      }
-    }
-    // A foot left out of reach (after a teleport or quick turn) re-plants out of turn.
-    for (const l of this.legs) {
-      if (l.stepping) continue;
+      const local = frac(this.phase + l.group * 0.5);
+      const inWindow = local < SWING;
       const h = this.hip(l.side, l.i);
-      const fd = dist(h, l.foot);
-      if (fd > reach * 1.02) {
-        const ideal = this.rest(l.side, l.i, 0.15);
-        l.from = { x: h.x + ((l.foot.x - h.x) / fd) * reach, y: h.y + ((l.foot.y - h.y) / fd) * reach };
-        l.to = anchor?.(ideal, 40 * this.scale) ?? ideal;
-        l.t0 = now;
-        l.dur = stepDur * 0.7;
-        l.stepping = true;
+
+      // after a teleport or a very fast hop: put the foot back under the body
+      if (dist(h, l.foot) > reach * 1.35) {
+        l.foot = this.rest(l.side, l.i);
+        l.s = -1;
+        continue;
       }
-    }
-    // Tetrapod gait: the next group may lift once the current one is halfway down.
-    const stepping = this.legs.filter((l) => l.stepping);
-    const progress = stepping.length ? Math.min(...stepping.map((l) => (now - l.t0) / l.dur)) : 1;
-    const busy = new Set(stepping.map((l) => l.group));
-    const threshold = (this.moving > 0.3 ? 30 : 46) * this.scale;
-    if (progress >= 0.5 && busy.size < 2) {
-      for (const g of [this.turn, (1 - this.turn) as 0 | 1]) {
-        if (busy.has(g)) continue;
-        const group = this.legs.filter((l) => l.group === g);
-        const lead = 0.35;
-        if (!group.some((l) => dist(l.foot, this.rest(l.side, l.i, lead)) > threshold)) continue;
-        for (const l of group) {
-          const ideal = this.rest(l.side, l.i, lead);
-          if (dist(l.foot, ideal) < 6 * this.scale) continue;
-          l.from = l.foot;
-          l.to = anchor?.(ideal, 40 * this.scale) ?? ideal;
-          l.t0 = now;
-          l.dur = stepDur;
-          l.stepping = true;
+
+      if (l.s < 0) {
+        if (!inWindow) l.stepped = false;
+        const wantsStep = inWindow && !l.stepped && this.stillFor === 0;
+        if (wantsStep) this.lift(l, anchor, false);
+      }
+      if (l.s >= 0) {
+        // progress: tied to distance while walking, to time when the body has stopped
+        const byDist = dPhase / SWING;
+        const byTime = l.timed || this.stillFor > 0 ? sdt / Math.max(0.12, 0.2 / Math.sqrt(speed)) : 0;
+        l.s = Math.min(1, l.s + Math.max(byDist, byTime));
+        const target = this.landing(l);
+        const to = { x: target.x + l.snap.x, y: target.y + l.snap.y };
+        const e = easeInOut(l.s);
+        l.foot = { x: l.from.x + (to.x - l.from.x) * e, y: l.from.y + (to.y - l.from.y) * e };
+        if (l.s >= 1) {
+          l.s = -1;
+          l.stepped = true;
+          l.timed = false;
         }
-        this.turn = (1 - g) as 0 | 1;
-        break;
       }
     }
+
+    // Standing still with a foot far from where it belongs (after a turn): settle, one group at a time.
+    if (this.stillFor > 0.25 && !this.legs.some((l) => l.s >= 0)) {
+      let worst: 0 | 1 | null = null;
+      let worstErr = 0.32 * STRIDE * k;
+      for (const l of this.legs) {
+        const err = dist(l.foot, this.rest(l.side, l.i));
+        if (err > worstErr) {
+          worstErr = err;
+          worst = l.group;
+        }
+      }
+      if (worst !== null) for (const l of this.legs) if (l.group === worst && dist(l.foot, this.rest(l.side, l.i)) > 6 * k) this.lift(l, anchor, true);
+    }
+  }
+
+  private lift(l: Leg, anchor: AnchorFn | null, timed: boolean) {
+    l.s = 0;
+    l.from = l.foot;
+    l.timed = timed;
+    const ideal = this.landing(l);
+    const snapped = anchor?.(ideal, 16 * this.scale);
+    l.snap = snapped ? { x: snapped.x - ideal.x, y: snapped.y - ideal.y } : { x: 0, y: 0 };
   }
 
   draw(ctx: CanvasRenderingContext2D, now: number, colors: { body: string; joint: string; foot: string; head: string; bg: string }, reduced: boolean) {
     const k = this.scale;
-    const bob = reduced ? 0 : Math.sin(now / 140) * 1.6 * k * this.moving + Math.sin(now / 1100) * 0.8 * k;
+    // body bobs with the gait: lowest when a group plants
+    const gaitBob = Math.cos(this.phase * Math.PI * 4) * 1.4 * k * this.moving;
+    const breathe = reduced ? 0 : Math.sin(now / 1100) * 0.7 * k;
     const bx = this.x;
-    const by = this.y + bob;
+    const by = this.y + (reduced ? 0 : gaitBob) + breathe;
     const reach = this.reach;
+    const A = FEMUR * k;
+    const BC = (TIBIA + TARSUS) * k;
 
     ctx.save();
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
-    // soft glow under the body
     const g = ctx.createRadialGradient(bx, by, 0, bx, by, 80 * k);
     g.addColorStop(0, 'rgba(111, 227, 234, 0.18)');
     g.addColorStop(1, 'rgba(111, 227, 234, 0)');
@@ -197,38 +231,45 @@ export class Spider {
 
     for (const l of this.legs) {
       const h = this.hip(l.side, l.i);
-      h.y += bob;
+      h.y += by - this.y;
+      const lift = l.s >= 0 ? Math.sin(Math.PI * l.s) : 0;
       let f = l.foot;
+      // a raised foot looks closer to the body from above
+      if (lift) f = { x: f.x + (h.x - f.x) * 0.14 * lift, y: f.y + (h.y - f.y) * 0.14 * lift };
       const fd = dist(h, f);
-      if (fd > reach) f = { x: h.x + ((f.x - h.x) / fd) * reach, y: h.y + ((f.y - h.y) / fd) * reach };
-      let lift = 0;
-      if (l.stepping) lift = Math.sin(Math.PI * Math.min(1, (now - l.t0) / l.dur));
-      // lifted feet tuck slightly toward the body (seen from above)
-      if (lift) f = { x: f.x + (h.x - f.x) * 0.08 * lift, y: f.y + (h.y - f.y) * 0.08 * lift - 6 * k * lift };
-      const len = Math.max(1e-3, dist(h, f));
-      const ux = (f.x - h.x) / len;
-      const uy = (f.y - h.y) / len;
-      const nx = -uy * l.side;
-      const ny = ux * l.side;
-      const ankle = { x: f.x - ux * TARSUS * k + nx * 6 * k, y: f.y - uy * TARSUS * k + ny * 6 * k };
-      const A = FEMUR * k;
-      const B = TIBIA * k;
-      const d = Math.min(A + B - 0.5, Math.max(Math.abs(A - B) + 0.5, dist(h, ankle)));
-      const base = Math.atan2(ankle.y - h.y, ankle.x - h.x);
-      const a = Math.acos((A * A + d * d - B * B) / (2 * A * d));
+      if (fd > reach * 0.99) f = { x: h.x + ((f.x - h.x) / fd) * reach * 0.99, y: h.y + ((f.y - h.y) / fd) * reach * 0.99 };
+
+      // knee: 2-bone IK, always bent outward (away from the body's midline)
+      const d = Math.min(A + BC - 0.5, Math.max(Math.abs(A - BC) + 0.5, dist(h, f)));
+      const base = Math.atan2(f.y - h.y, f.x - h.x);
+      const a = Math.acos(Math.max(-1, Math.min(1, (A * A + d * d - BC * BC) / (2 * A * d))));
+      const lat = { x: Math.cos(this.heading + (l.side * Math.PI) / 2), y: Math.sin(this.heading + (l.side * Math.PI) / 2) };
       const k1 = { x: h.x + Math.cos(base + a) * A, y: h.y + Math.sin(base + a) * A };
       const k2 = { x: h.x + Math.cos(base - a) * A, y: h.y + Math.sin(base - a) * A };
-      // knee bends away from the body, like a real spider seen from above
-      const knee = dist(k1, { x: bx, y: by }) > dist(k2, { x: bx, y: by }) ? k1 : k2;
+      const out1 = (k1.x - h.x) * lat.x + (k1.y - h.y) * lat.y;
+      const out2 = (k2.x - h.x) * lat.x + (k2.y - h.y) * lat.y;
+      const knee = out1 >= out2 ? k1 : k2;
+      // ankle: along knee->foot, bulging the same way as the knee so the leg reads as one smooth arc
+      const t = TIBIA / (TIBIA + TARSUS);
+      const kx = f.x - knee.x;
+      const ky = f.y - knee.y;
+      const kl = Math.hypot(kx, ky) || 1;
+      let nx = -ky / kl;
+      let ny = kx / kl;
+      if (nx * (knee.x - (h.x + f.x) / 2) + ny * (knee.y - (h.y + f.y) / 2) < 0) {
+        nx = -nx;
+        ny = -ny;
+      }
+      const ankle = { x: knee.x + kx * t + nx * 5 * k, y: knee.y + ky * t + ny * 5 * k };
 
       ctx.globalAlpha = 0.95;
       ctx.strokeStyle = colors.body;
-      ctx.lineWidth = 2.4 * k;
+      ctx.lineWidth = (2.5 + lift * 0.6) * k;
       ctx.beginPath();
       ctx.moveTo(h.x, h.y);
       ctx.lineTo(knee.x, knee.y);
       ctx.stroke();
-      ctx.lineWidth = 1.9 * k;
+      ctx.lineWidth = (2 + lift * 0.4) * k;
       ctx.beginPath();
       ctx.moveTo(knee.x, knee.y);
       ctx.lineTo(ankle.x, ankle.y);
@@ -240,17 +281,20 @@ export class Spider {
       ctx.stroke();
       ctx.globalAlpha = 1;
       ctx.fillStyle = colors.joint;
-      dot(ctx, knee.x, knee.y, 3.4 * k);
-      dot(ctx, ankle.x, ankle.y, 2.6 * k);
+      dot(ctx, knee.x, knee.y, (3.4 + lift) * k);
+      dot(ctx, ankle.x, ankle.y, 2.5 * k);
       ctx.fillStyle = colors.foot;
-      dot(ctx, f.x, f.y, (3 + lift * 1.4) * k);
+      ctx.globalAlpha = 1 - lift * 0.35;
+      dot(ctx, f.x, f.y, (3 + lift * 1.2) * k);
+      ctx.globalAlpha = 1;
     }
 
-    // pedipalps
+    // pedipalps, twitching a little with the gait
+    const palp = Math.sin(this.phase * Math.PI * 2) * 2 * k * this.moving;
     for (const side of [1, -1]) {
       const p0 = rot(17 * k, side * 4 * k, this.heading);
-      const p1 = rot(27 * k, side * 9 * k, this.heading);
-      const p2 = rot(33 * k, side * 6 * k, this.heading);
+      const p1 = rot(27 * k + palp * side, side * 9 * k, this.heading);
+      const p2 = rot(33 * k + palp * side, side * 6 * k, this.heading);
       ctx.strokeStyle = colors.body;
       ctx.lineWidth = 1.5 * k;
       ctx.beginPath();
@@ -260,22 +304,23 @@ export class Spider {
       ctx.stroke();
     }
 
-    // abdomen, thorax, head
+    // abdomen (swings slightly opposite the gait), thorax, head
+    const sway = Math.sin(this.phase * Math.PI * 2) * 0.06 * this.moving;
     ctx.fillStyle = colors.bg;
     ctx.strokeStyle = colors.body;
     ctx.lineWidth = 2 * k;
-    const back = rot(-30 * k, 0, this.heading);
+    const ah = this.heading + sway;
+    const back = rot(-30 * k, 0, ah);
     ctx.beginPath();
-    ctx.ellipse(bx + back.x, by + back.y, 24 * k, 17 * k, this.heading, 0, Math.PI * 2);
+    ctx.ellipse(bx + back.x, by + back.y, 24 * k, 17 * k, ah, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
-    // abdomen chevrons
     ctx.globalAlpha = 0.55;
     ctx.lineWidth = 1.3 * k;
     for (const off of [-40, -31, -22]) {
-      const c = rot(off * k, 0, this.heading);
-      const l1 = rot((off - 5) * k, 7 * k, this.heading);
-      const r1 = rot((off - 5) * k, -7 * k, this.heading);
+      const c = rot(off * k, 0, ah);
+      const l1 = rot((off - 5) * k, 7 * k, ah);
+      const r1 = rot((off - 5) * k, -7 * k, ah);
       ctx.beginPath();
       ctx.moveTo(bx + l1.x, by + l1.y);
       ctx.lineTo(bx + c.x, by + c.y);

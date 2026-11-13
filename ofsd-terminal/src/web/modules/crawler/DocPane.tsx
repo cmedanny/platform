@@ -183,63 +183,106 @@ export function DocPane({ s, onLayout }: { s: CrawlSession; onLayout?: (l: DocLa
       const top = sc.scrollTop - 40;
       const bottom = sc.scrollTop + H + 40;
       const trail = pref('trail', true);
+      const silkOn = pref('silk', true);
+      // Discovery timeline per token (ms, compressed a little at higher speeds):
+      // silk shoots out -> pulse on contact -> box traces itself -> silk pulls back -> highlight settles to 40%.
+      const T = 1 / Math.sqrt(speed);
+      const SHOOT = 220 * T;
+      const DRAW = 300 * T;
+      const HOLD = 620 * T;
+      const RETRACT = 320 * T;
+      const hd = sp.head();
+      const silks: Array<{ x: number; y: number; reach: number; alpha: number }> = [];
       for (let id = 0; id < s.readAt.length; id++) {
         const at = s.readAt[id];
         if (at === undefined) continue;
-        const age = now - at;
-        if (!trail && age > 900) continue;
+        const age = red ? 1e9 : now - at;
+        if (!trail && age > HOLD + RETRACT + 600) continue;
         const r = layout.rect(id);
         if (!r || r.y > bottom || r.y + r.h < top) continue;
         const t = s.tokens[id];
-        const fresh = red ? 0 : Math.exp(-age / 450);
-        const a = 0.4 + 0.6 * fresh;
         const col = toneColor(colors, t.tone);
-        ctx.globalAlpha = a;
+        // contact point: the side of the token facing the spider
+        const cx = Math.max(r.x, Math.min(r.x + r.w, hd.x));
+        const cy = Math.max(r.y, Math.min(r.y + r.h, hd.y));
+
+        if (age < HOLD + RETRACT && silkOn) {
+          const out = Math.min(1, age / SHOOT);
+          const back = age > HOLD ? Math.min(1, (age - HOLD) / RETRACT) : 0;
+          silks.push({ x: cx, y: cy, reach: (1 - Math.pow(1 - out, 3)) * (1 - back * back), alpha: 1 - back * 0.6 });
+        }
+        if (age >= SHOOT && age < SHOOT + 300 * T) {
+          // little pulse where the silk lands
+          const p = (age - SHOOT) / (300 * T);
+          ctx.globalAlpha = (1 - p) * 0.8;
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1.2;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 3 + p * 16, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+
+        const drawP = Math.max(0, Math.min(1, (age - SHOOT * 0.8) / DRAW));
+        if (drawP <= 0) continue;
+        const settleAge = age - SHOOT * 0.8 - DRAW;
+        const fresh = settleAge <= 0 ? 1 : Math.exp(-settleAge / 700);
+        const a = 0.4 + 0.6 * fresh;
+        const e = 1 - Math.pow(1 - drawP, 3);
         if (t.kind === 'header') {
+          // fill wipes in from the left
           ctx.fillStyle = col;
           ctx.globalAlpha = 0.16 + 0.3 * fresh;
-          ctx.fillRect(r.x - 4, r.y - 1, r.w + 8, r.h + 2);
+          ctx.fillRect(r.x - 4, r.y - 1, (r.w + 8) * e, r.h + 2);
           ctx.globalAlpha = a;
-          ctx.fillRect(r.x - 6, r.y - 1, 2, r.h + 2);
+          ctx.fillRect(r.x - 6, r.y - 1, 2, (r.h + 2) * e);
         } else if (t.kind === 'label') {
           ctx.strokeStyle = col;
+          ctx.globalAlpha = a;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(r.x, r.y + r.h + 0.5);
-          ctx.lineTo(r.x + r.w, r.y + r.h + 0.5);
+          ctx.lineTo(r.x + r.w * e, r.y + r.h + 0.5);
           ctx.stroke();
         } else {
+          const x = r.x - 2.5;
+          const y = r.y - 1.5;
+          const w = r.w + 5;
+          const h = r.h + 3;
           ctx.fillStyle = col;
-          ctx.globalAlpha = 0.1 + 0.22 * fresh;
-          ctx.fillRect(r.x - 2, r.y - 1, r.w + 4, r.h + 2);
+          ctx.globalAlpha = (0.1 + 0.22 * fresh) * e;
+          ctx.fillRect(x + 0.5, y + 0.5, w - 1, h - 1);
           ctx.globalAlpha = a;
           ctx.strokeStyle = col;
           ctx.lineWidth = 1;
-          ctx.strokeRect(r.x - 2.5, r.y - 1.5, r.w + 5, r.h + 3);
+          if (drawP < 1) {
+            // trace the outline
+            const per = 2 * (w + h);
+            ctx.setLineDash([per * e, per]);
+            ctx.strokeRect(x, y, w, h);
+            ctx.setLineDash([]);
+          } else ctx.strokeRect(x, y, w, h);
         }
       }
       ctx.globalAlpha = 1;
 
-      // silk thread from the head to the token just read; it fades between reads
-      const cur = reader.cur >= 0 ? layout.rect(reader.cur) : null;
-      const readAge = reader.cur >= 0 ? now - (s.readAt[reader.cur] ?? -1e9) : 1e9;
-      const silkA = reader.mode === 'done' ? 0 : Math.max(0, 1 - readAge / (900 / Math.sqrt(speed)));
-      if (cur && pref('silk', true) && silkA > 0.02) {
-        const hd = sp.head();
-        const tx = cur.x + Math.min(cur.w, 120) / 2;
-        const ty = cur.y + cur.h / 2;
-        const sag = Math.min(40, Math.hypot(tx - hd.x, ty - hd.y) * 0.12);
+      // silk lines from the head out to the tokens being found
+      if (silks.length) {
         ctx.strokeStyle = colors.red;
-        ctx.globalAlpha = 0.75 * silkA;
-        ctx.lineWidth = 1.1;
-        ctx.beginPath();
-        ctx.moveTo(hd.x, hd.y);
-        ctx.quadraticCurveTo((hd.x + tx) / 2, (hd.y + ty) / 2 + sag, tx, ty);
-        ctx.stroke();
         ctx.fillStyle = colors.red;
-        ctx.beginPath();
-        ctx.arc(tx, ty, 2, 0, Math.PI * 2);
-        ctx.fill();
+        ctx.lineWidth = 1.1;
+        for (const k of silks.slice(-14)) {
+          const ex = hd.x + (k.x - hd.x) * k.reach;
+          const ey = hd.y + (k.y - hd.y) * k.reach;
+          const sag = Math.min(36, Math.hypot(ex - hd.x, ey - hd.y) * 0.1);
+          ctx.globalAlpha = 0.8 * k.alpha;
+          ctx.beginPath();
+          ctx.moveTo(hd.x, hd.y);
+          ctx.quadraticCurveTo((hd.x + ex) / 2, (hd.y + ey) / 2 + sag, ex, ey);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.arc(ex, ey, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.globalAlpha = 1;
       }
 
@@ -252,7 +295,8 @@ export function DocPane({ s, onLayout }: { s: CrawlSession; onLayout?: (l: DocLa
         for (const c of reader.callouts) {
           const r = layout.rect(c.tok.id);
           if (!r) continue;
-          const age = (now - c.t0) * Math.max(1, speed * 0.6);
+          const age = (now - c.t0 - (red ? 0 : SHOOT)) * Math.max(1, speed * 0.6);
+          if (age < 0) continue;
           const inT = Math.min(1, age / 160);
           const scale = red ? 1 : 0.6 + 0.4 * (1 + 2.2 * Math.pow(inT - 1, 3) + 1.2 * Math.pow(inT - 1, 2));
           const alpha = red ? (age < 900 ? 1 : 0) : age < 760 ? 1 : Math.max(0, 1 - (age - 760) / 300);

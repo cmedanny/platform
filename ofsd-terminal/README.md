@@ -96,7 +96,7 @@ What you see while it runs, all driven by the real download and parse:
 
 - **Network strip:** every real request (GET, status, size, time) with a live byte counter.
 - **Raw source:** the actual HTML streaming in. Tags are dim, text is bright. Once reading starts, it follows the spider and underlines the exact bytes being read.
-- **Document:** the rendered page. A large spider walks down it on a wandering path, plants its feet on the words, and highlights only extracted things: numbers, $, %, dates, fiscal periods, line items, section headers.
+- **Document:** the rendered page. A large spider walks down it on a wandering path, plants its feet on the words, and finds each extracted value with a silk line (the highlight traces itself in, then settles). It only highlights extracted things: numbers, $, %, dates, fiscal periods, line items, section headers.
   Colors: **lime** = current period, **magenta** = prior period, **cyan** = labels, **orange** = section headers.
 - **HUD:** live counts, speed (0.5x to 4x, default 1x), Replay, Jump to statements, and **Ask this document** (press `/`).
 

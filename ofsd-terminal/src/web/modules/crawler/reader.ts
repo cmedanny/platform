@@ -160,7 +160,7 @@ export class Reader {
       sp.place((b.left + b.right) / 2, b.top + 110 * k);
       this.placed = true;
     }
-    this.callouts = this.callouts.filter((c) => now - c.t0 < 1000 / Math.max(1, speed * 0.6));
+    this.callouts = this.callouts.filter((c) => now - c.t0 < 1300 / Math.max(1, speed * 0.6));
 
     // ---- jumps and visits: hop near the target, then walk the last bit ----
     if (this.pendingJump) {
