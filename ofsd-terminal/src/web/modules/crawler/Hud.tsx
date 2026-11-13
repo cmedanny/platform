@@ -22,7 +22,7 @@ function phaseText(s: CrawlSession) {
 }
 
 export function Hud({ s }: { s: CrawlSession }) {
-  const [speed, setSpeed] = usePref('crawler', 'speed', '2x');
+  const [speed, setSpeed] = usePref('crawler', 'speed', '1x');
   const [view, setView] = usePref<'live' | 'report'>('crawler', 'view', 'live');
   const [q, setQ] = useState('');
   const ask = useRef<HTMLInputElement>(null);

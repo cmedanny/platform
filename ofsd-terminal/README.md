@@ -96,16 +96,17 @@ What you see while it runs, all driven by the real download and parse:
 
 - **Network strip:** every real request (GET, status, size, time) with a live byte counter.
 - **Raw source:** the actual HTML streaming in. Tags are dim, text is bright. Once reading starts, it follows the spider and underlines the exact bytes being read.
-- **Document:** the rendered page. The spider walks it and highlights only extracted things: numbers, $, %, dates, fiscal periods, line items, section headers.
+- **Document:** the rendered page. A large spider walks down it on a wandering path, plants its feet on the words, and highlights only extracted things: numbers, $, %, dates, fiscal periods, line items, section headers.
   Colors: **lime** = current period, **magenta** = prior period, **cyan** = labels, **orange** = section headers.
-- **HUD:** live counts, speed (0.5x to 4x, default 2x), Replay, Jump to statements, and **Ask this document** (press `/`).
+- **HUD:** live counts, speed (0.5x to 4x, default 1x), Replay, Jump to statements, and **Ask this document** (press `/`).
 
 When it finishes, the **Report** tab shows Claude's summary, key figures (current, prior, change, and a source link that
 walks the spider back to the number) and observations. Export to CSV or Excel from there. The **Attach to thesis**
 switch marks a crawl as extra context for the thesis builder (step 3).
 
-A full 10-Q takes about 2 minutes at the default 2x (about 4 at 1x, 1 at 4x). The income statement comes up in the first
-10 to 20 seconds. Use **Jump to statements** if you just want the numbers.
+The spider wanders slowly down the page and reads values as it passes them. A full 10-Q (about 43 pages) takes
+roughly 10 minutes at the default 1x, 5 at 2x and 2.5 at 4x. The Report tab is ready as soon as Claude finishes,
+you don't have to wait for the spider. Use **Jump to statements** to go straight to the numbers.
 Without a Claude key the crawl still works; you just don't get the summary and observations.
 
 Every crawl is saved. Reopen one from **Recent** in the inspector, or replay it from **Runs**.

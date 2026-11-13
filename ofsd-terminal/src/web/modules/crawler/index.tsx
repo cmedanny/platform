@@ -111,7 +111,7 @@ function Inspector() {
   const [form, setForm] = usePref(ID, 'form', '10-Q');
   const [ticker, setTicker] = usePref(ID, 'ticker', '');
   const [url, setUrl] = usePref(ID, 'url', '');
-  const [speed, setSpeed] = usePref(ID, 'speed', '2x');
+  const [speed, setSpeed] = usePref(ID, 'speed', '1x');
   const [callouts, setCallouts] = usePref(ID, 'callouts', true);
   const [silk, setSilk] = usePref(ID, 'silk', true);
   const [trail, setTrail] = usePref(ID, 'trail', true);

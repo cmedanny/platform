@@ -7,7 +7,7 @@ import { Reader } from './reader.ts';
 import type { CrawlSession } from './session.ts';
 
 export const SPEEDS: Record<string, number> = { '0.5x': 0.5, '1x': 1, '2x': 2, '4x': 4 };
-export const speedNow = () => SPEEDS[(useStore.getState().prefs.crawler?.speed as string) ?? '2x'] ?? 2;
+export const speedNow = () => SPEEDS[(useStore.getState().prefs.crawler?.speed as string) ?? '1x'] ?? 1;
 const pref = (k: string, d: boolean) => (useStore.getState().prefs.crawler?.[k] as boolean | undefined) ?? d;
 
 function withTokens(text: string, toks: DocToken[]): ReactNode[] {
@@ -171,9 +171,9 @@ export function DocPane({ s, onLayout }: { s: CrawlSession; onLayout?: (l: DocLa
       // camera: keep the spider ~40% down the viewport unless the user is scrolling
       const sp = reader.spider;
       if (now - userScrollAt > 2500 && reader.mode !== 'done') {
-        const want = Math.max(0, sp.y - H * 0.42);
+        const want = Math.max(0, sp.y - H * 0.45);
         const delta = want - sc.scrollTop;
-        if (Math.abs(delta) > 2) sc.scrollTop += red || Math.abs(delta) > H * 3 ? delta : delta * Math.min(1, dt * 4);
+        if (Math.abs(delta) > 2) sc.scrollTop += red || Math.abs(delta) > H * 2 ? delta : delta * Math.min(1, dt * 2.2);
       }
 
       // ---- draw overlay ----
@@ -220,24 +220,27 @@ export function DocPane({ s, onLayout }: { s: CrawlSession; onLayout?: (l: DocLa
       }
       ctx.globalAlpha = 1;
 
-      // silk thread to the token being read
+      // silk thread from the head to the token just read; it fades between reads
       const cur = reader.cur >= 0 ? layout.rect(reader.cur) : null;
-      if (cur && pref('silk', true) && reader.mode !== 'done') {
-        const tail = { x: sp.x, y: sp.y - 4 };
+      const readAge = reader.cur >= 0 ? now - (s.readAt[reader.cur] ?? -1e9) : 1e9;
+      const silkA = reader.mode === 'done' ? 0 : Math.max(0, 1 - readAge / (900 / Math.sqrt(speed)));
+      if (cur && pref('silk', true) && silkA > 0.02) {
+        const hd = sp.head();
         const tx = cur.x + Math.min(cur.w, 120) / 2;
-        const ty = cur.y + cur.h + 1;
+        const ty = cur.y + cur.h / 2;
+        const sag = Math.min(40, Math.hypot(tx - hd.x, ty - hd.y) * 0.12);
         ctx.strokeStyle = colors.red;
-        ctx.globalAlpha = 0.7;
-        ctx.lineWidth = 0.8;
+        ctx.globalAlpha = 0.75 * silkA;
+        ctx.lineWidth = 1.1;
         ctx.beginPath();
-        ctx.moveTo(tail.x, tail.y);
-        ctx.quadraticCurveTo((tail.x + tx) / 2 + 4, (tail.y + ty) / 2 + 3, tx, ty);
+        ctx.moveTo(hd.x, hd.y);
+        ctx.quadraticCurveTo((hd.x + tx) / 2, (hd.y + ty) / 2 + sag, tx, ty);
         ctx.stroke();
-        ctx.globalAlpha = 1;
         ctx.fillStyle = colors.red;
         ctx.beginPath();
-        ctx.arc(tx, ty, 1.3, 0, Math.PI * 2);
+        ctx.arc(tx, ty, 2, 0, Math.PI * 2);
         ctx.fill();
+        ctx.globalAlpha = 1;
       }
 
       sp.draw(ctx, now, { body: colors.label, joint: colors.label, foot: colors.prior, head: '#e9fbff', bg: colors.bg }, red);

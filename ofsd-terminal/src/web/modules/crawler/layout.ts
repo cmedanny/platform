@@ -14,6 +14,7 @@ export class DocLayout {
   private rects = new Map<number, Rect | null>();
   private anchors = new Map<number, Pt[]>();
   private boxes: Array<{ id: number; y: number; h: number; el: HTMLElement }> | null = null;
+  private box: { left: number; right: number; top: number; bottom: number } | null = null;
 
   constructor(
     private scroller: HTMLElement,
@@ -21,6 +22,7 @@ export class DocLayout {
   ) {}
 
   invalidate() {
+    this.box = null;
     this.rects.clear();
     this.anchors.clear();
     this.boxes = null;
@@ -29,6 +31,7 @@ export class DocLayout {
   /** New blocks were appended: earlier geometry is unchanged, only the block index needs refreshing. */
   appended() {
     this.boxes = null;
+    this.box = null;
     for (const [k, v] of this.rects) if (v === null) this.rects.delete(k);
   }
 
@@ -116,6 +119,24 @@ export class DocLayout {
     }
     return best;
   };
+
+  /** Text column of the document and the bottom of what has rendered so far. */
+  bounds() {
+    if (this.box) return this.box;
+    const o = this.origin();
+    const r = this.content.getBoundingClientRect();
+    const cs = getComputedStyle(this.content);
+    const boxes = this.blockBoxes();
+    const last = boxes[boxes.length - 1];
+    const top = r.top - o.y + parseFloat(cs.paddingTop);
+    this.box = {
+      left: r.left - o.x + parseFloat(cs.paddingLeft),
+      right: r.right - o.x - parseFloat(cs.paddingRight),
+      top,
+      bottom: last ? last.y + last.h : top,
+    };
+    return this.box;
+  }
 
   blockTop(id: number) {
     return this.blockBoxes().find((b) => b.id === id)?.y ?? null;
