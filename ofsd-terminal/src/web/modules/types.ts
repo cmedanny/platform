@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { LogLevel } from '../../shared/types.ts';
+import type { LogLevel, RunSummary } from '../../shared/types.ts';
 
 export interface CommandCtx {
   line: (text: string, level?: LogLevel) => void;
@@ -12,8 +12,14 @@ export interface ClientCommand {
   description: string;
   /** Runs in the browser. Without it, the command is sent to the backend. */
   local?: (args: string, ctx: CommandCtx) => void;
+  /** Not listed in autocomplete or /help (used by buttons and inputs in the UI). */
+  hidden?: boolean;
   /** Shown greyed in autocomplete while the feature isn't built yet. */
   soon?: string;
+  /** Rewrites the arguments before sending (e.g. adds a default form type). */
+  transform?: (args: string) => string;
+  /** Called once the backend has started the run. */
+  onStarted?: (runId: string) => void;
 }
 
 /**
@@ -33,4 +39,6 @@ export interface ModuleDef {
   placement?: 'main' | 'footer';
   /** Show in the sidebar stats table (defaults to true for main modules). */
   stats?: boolean;
+  /** Custom replay for this module's runs. Return false to fall back to the log replay. */
+  onReplay?: (run: RunSummary, speed: number) => boolean;
 }

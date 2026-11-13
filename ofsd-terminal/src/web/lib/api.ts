@@ -20,7 +20,9 @@ export const api = {
   runs: () => req<RunSummary[]>('/api/runs'),
   run: (id: string) => req<RunDetail>(`/api/runs/${id}`),
   deleteRun: (id: string) => req<{ ok: true }>(`/api/runs/${id}`, { method: 'DELETE' }),
-  command: (text: string) => req<CommandResponse>('/api/command', { method: 'POST', body: JSON.stringify({ text }) }),
+  command: (text: string, display?: string) => req<CommandResponse>('/api/command', { method: 'POST', body: JSON.stringify({ text, display }) }),
+  get: <T>(path: string) => req<T>(path),
+  post: <T>(path: string, body: unknown) => req<T>(path, { method: 'POST', body: JSON.stringify(body) }),
 };
 
 /**
@@ -52,7 +54,7 @@ export function followRun(id: string, onEvent: (e: RunEvent) => void, onLost: ()
  * Replays a stored run with its original timing (scaled by speed).
  * Long pauses are capped so replays stay snappy.
  */
-export function replayEvents(events: RunEvent[], onEvent: (e: RunEvent) => void, speed = 1, maxGap = 900) {
+export function replayEvents(events: RunEvent[], onEvent: (e: RunEvent) => void, speed: number | (() => number) = 1, maxGap = 900) {
   let i = 0;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let stopped = false;
@@ -62,7 +64,8 @@ export function replayEvents(events: RunEvent[], onEvent: (e: RunEvent) => void,
     onEvent(e);
     const next = events[i];
     if (!next) return;
-    const gap = Math.min(maxGap, Math.max(0, next.t - e.t)) / speed;
+    const sp = typeof speed === 'function' ? speed() : speed;
+    const gap = Math.min(maxGap, Math.max(0, next.t - e.t)) / sp;
     timer = setTimeout(step, gap);
   };
   step();

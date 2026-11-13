@@ -3,8 +3,8 @@
 A private, local workspace where you run Claude-powered research tools and watch them work live.
 Everything runs on your computer. API keys stay in one file (`.env`) that the browser never sees.
 
-**Build status:** Step 1 of 4 done (app shell, design system, sidebar, inspector, command bar).
-The crawler, thesis builder and brain screens are placeholders until steps 2 to 4.
+**Build status:** Steps 1 and 2 of 4 done (app shell + web crawler).
+The thesis builder and brain screens are placeholders until steps 3 and 4.
 
 ---
 
@@ -80,6 +80,38 @@ Anything Claude writes is tagged **DRAFT**.
 
 ---
 
+## Web crawler
+
+| Type this | What it reads |
+|---|---|
+| `/crawl NVDA 10-Q` | NVIDIA's latest quarterly report from SEC EDGAR |
+| `/crawl AAPL 10-K` | Apple's latest annual report |
+| `/crawl MSFT 8-K` | Latest 8-K, plus its press release (exhibit 99) when there is one |
+| `/crawl NVDA` | Latest filing of the default form (set in the inspector) |
+| `/crawl https://…` | Any public web page |
+
+You can also start a crawl from the inspector's **New crawl** section.
+
+What you see while it runs, all driven by the real download and parse:
+
+- **Network strip:** every real request (GET, status, size, time) with a live byte counter.
+- **Raw source:** the actual HTML streaming in. Tags are dim, text is bright. Once reading starts, it follows the spider and underlines the exact bytes being read.
+- **Document:** the rendered page. The spider walks it and highlights only extracted things: numbers, $, %, dates, fiscal periods, line items, section headers.
+  Colors: **lime** = current period, **magenta** = prior period, **cyan** = labels, **orange** = section headers.
+- **HUD:** live counts, speed (0.5x to 4x, default 2x), Replay, Jump to statements, and **Ask this document** (press `/`).
+
+When it finishes, the **Report** tab shows Claude's summary, key figures (current, prior, change, and a source link that
+walks the spider back to the number) and observations. Export to CSV or Excel from there. The **Attach to thesis**
+switch marks a crawl as extra context for the thesis builder (step 3).
+
+A full 10-Q takes about 2 minutes at the default 2x (about 4 at 1x, 1 at 4x). The income statement comes up in the first
+10 to 20 seconds. Use **Jump to statements** if you just want the numbers.
+Without a Claude key the crawl still works; you just don't get the summary and observations.
+
+Every crawl is saved. Reopen one from **Recent** in the inspector, or replay it from **Runs**.
+
+---
+
 ## Settings you can change in `.env`
 
 | Line | What it does |
@@ -105,6 +137,10 @@ inside the same call ("server-side fallback"). It's on by default.
 | "Claude rejected the API key" | The key is wrong or was revoked. Create a new one |
 | "out of credits" | Add credits in the Anthropic Console (Billing) |
 | "Backend offline" in the top bar | The Terminal window running `npm start` was closed. Run it again |
+| "SEC needs your name and email" | Fill in `SEC_USER_AGENT` in `.env` (step 4) |
+| "SEC refused the request (403)" | `SEC_USER_AGENT` needs a real-looking name and email |
+| "Couldn't find ticker" | Check the spelling. EDGAR only has US-listed companies |
+| "found no readable text" | That page builds itself with JavaScript, which the crawler can't run |
 | `Port 5173 is in use` | Another copy is already running. Close it, or use the browser tab it opened |
 
 Your saved runs live in `ofsd-terminal/data/ofsd.sqlite`. Back up that file to keep your history.
@@ -120,12 +156,14 @@ src/
     index.ts               routes + command dispatch
     runs.ts                every run is an event timeline in SQLite (powers live view + replay)
     claude.ts              Claude streaming + plain-English errors
+    crawler/               fetch (live network events), EDGAR lookups, streaming HTML parser, extractor, Claude analysis
     modules/               one file per backend module
   web/                     React front end
     shell/                 sidebar, top bar, inspector, command log, command bar
     ui/                    design-system components (Section, Segmented, Select, Switch...)
     styles/tokens.css      colors, type sizes, motion
     modules/               one folder per screen; registry.ts lists them
+      crawler/             session (live/replay), spider rig + reader, raw/doc/network panes, HUD, report
 ```
 
 Adding a module (for example a macro data panel) means: one folder in `src/web/modules/`, one line in

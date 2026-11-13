@@ -42,14 +42,17 @@ interface StreamOpts {
   system: string;
   messages: Anthropic.Beta.BetaMessageParam[];
   maxTokens?: number;
+  onText?: (delta: string) => void;
+  /** Called once if the reply was cut off by the length limit. */
+  onTruncated?: () => void;
 }
 
 /**
- * Streams Claude's reply into a run as `text` events and returns the full text.
+ * Streams a reply and returns the full text.
  * Server-side fallback ("default") is on: if the model declines for policy
  * reasons, Anthropic retries on a fallback model inside the same call.
  */
-export async function streamToRun(run: Run, opts: StreamOpts): Promise<string> {
+export async function streamClaude(opts: StreamOpts): Promise<{ text: string; cacheRead: number }> {
   const { client, model } = getClient();
   const stream = client.beta.messages.stream({
     model,
@@ -59,11 +62,22 @@ export async function streamToRun(run: Run, opts: StreamOpts): Promise<string> {
     betas: ['server-side-fallback-2026-07-01'],
     fallbacks: 'default',
   });
-  stream.on('text', (delta) => run.text(delta));
+  if (opts.onText) stream.on('text', opts.onText);
   const final = await stream.finalMessage();
-  if (final.stop_reason === 'refusal') {
-    throw new UserFacingError("Claude declined to answer this one. Try rephrasing.");
-  }
-  if (final.stop_reason === 'max_tokens') run.log('Reply hit the length limit and was cut off.', 'warn');
-  return final.content.map((b) => (b.type === 'text' ? b.text : '')).join('');
+  if (final.stop_reason === 'refusal') throw new UserFacingError('Claude declined to answer this one. Try rephrasing.');
+  if (final.stop_reason === 'max_tokens') opts.onTruncated?.();
+  return {
+    text: final.content.map((b) => (b.type === 'text' ? b.text : '')).join(''),
+    cacheRead: final.usage.cache_read_input_tokens ?? 0,
+  };
+}
+
+/** Streams Claude's reply into a run as `text` events and returns the full text. */
+export async function streamToRun(run: Run, opts: Omit<StreamOpts, 'onText' | 'onTruncated'>): Promise<string> {
+  const { text } = await streamClaude({
+    ...opts,
+    onText: (d) => run.text(d),
+    onTruncated: () => run.log('Reply hit the length limit and was cut off.', 'warn'),
+  });
+  return text;
 }

@@ -42,7 +42,7 @@ export function CommandBar() {
   const suggestions = useMemo(() => {
     const m = value.match(/^\/(\S*)$/);
     if (!m || dismissed) return [];
-    return allCommands().filter((c) => c.name.startsWith(m[1].toLowerCase()));
+    return allCommands().filter((c) => !c.hidden && c.name.startsWith(m[1].toLowerCase()));
   }, [value, dismissed]);
   const showSuggest = suggestions.length > 0;
 

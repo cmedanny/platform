@@ -106,7 +106,14 @@ function Canvas() {
                 <td className="mono dim">{stamp(r.createdAt)}</td>
                 <td className="num dim">{duration(r.finishedAt ? r.finishedAt - r.createdAt : null)}</td>
                 <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <button className="btn btn--ghost" onClick={() => replayRun(r.id, Number(speed))} title="Replay into the command log">
+                  <button
+                    className="btn btn--ghost"
+                    onClick={() => {
+                      const m = modules.find((x) => x.id === r.module);
+                      if (!m?.onReplay?.(r, Number(speed))) replayRun(r.id, Number(speed));
+                    }}
+                    title="Replay this run"
+                  >
                     ▶ Replay
                   </button>
                   <button

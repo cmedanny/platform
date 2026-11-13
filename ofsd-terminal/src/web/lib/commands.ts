@@ -20,7 +20,7 @@ const core: ClientCommand[] = [
     usage: '/help',
     description: 'List every command.',
     local: (_a, ctx) => {
-      for (const c of allCommands()) ctx.line(`${c.usage.padEnd(26)} ${c.description}${c.soon ? `  (${c.soon})` : ''}`);
+      for (const c of allCommands().filter((x) => !x.hidden)) ctx.line(`${c.usage.padEnd(26)} ${c.description}${c.soon ? `  (${c.soon})` : ''}`);
       ctx.line('Shortcuts: ⌘K / Ctrl+K focus the bar · ↑/↓ history · Tab completes · Esc closes.');
     },
   },
@@ -36,7 +36,7 @@ function parse(text: string) {
   return m ? { name: m[1].toLowerCase(), args: m[2] } : { name: 'ask', args: text };
 }
 
-export async function execute(raw: string) {
+export async function execute(raw: string, display?: string) {
   const text = raw.trim();
   if (!text) return;
   const s = useStore.getState();
@@ -71,12 +71,14 @@ export async function execute(raw: string) {
     return;
   }
 
-  const id = s.addEntry({ command: text, source: 'run' });
+  const id = s.addEntry({ command: display ?? text, source: 'run', module: modules.find((m) => m.commands?.includes(cmd))?.id });
   try {
-    const res = await api.command(text);
+    const sendText = cmd.transform ? `/${cmd.name} ${cmd.transform(args)}`.trim() : text;
+    const res = await api.command(sendText, display);
     if (!res.runId) throw new BackendError(res.error || 'The backend did not start a run.');
     useStore.setState((st) => ({ entries: st.entries.map((e) => (e.id === id ? { ...e, runId: res.runId } : e)) }));
     useStore.getState().bumpRuns();
+    cmd.onStarted?.(res.runId);
     followRun(
       res.runId,
       (ev) => {

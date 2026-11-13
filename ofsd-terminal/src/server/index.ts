@@ -61,7 +61,9 @@ app.post('/api/command', (req, res) => {
     res.status(404).json({ error: `Unknown command /${name}. Type /help to see what's available.` } satisfies CommandResponse);
     return;
   }
-  const run = new Run(entry.module, text);
+  // `display` lets the UI show a friendlier label than the raw command (e.g. ask-this-document).
+  const display = String(req.body?.display ?? '').trim();
+  const run = new Run(entry.module, display || text);
   res.json({ runId: run.id } satisfies CommandResponse);
   // Work continues after the response; the browser follows along via SSE.
   entry.cmd
