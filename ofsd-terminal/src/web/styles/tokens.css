@@ -1,0 +1,58 @@
+/* OFSD design tokens. Color carries meaning only:
+   lime = current/new · magenta = prior/comparison · cyan = labels/links
+   orange = section headers · red = live/errors. Everything else is navy + gray. */
+:root {
+  --bg: #121a2b;
+  --bg-deep: #0e1524;
+  --panel: #161f33;
+  --panel-2: #1a2440;
+  --panel-3: #1f2a48;
+  --border: #232d47;
+  --border-strong: #2e3a5a;
+  --hover: rgba(255, 255, 255, 0.035);
+
+  --text: #c3cbdb;
+  --text-bright: #eef2f8;
+  --text-dim: #7d889f;
+  --text-faint: #4d5872;
+
+  --seg-on-bg: #e4e9f2;
+  --seg-on-text: #111a2b;
+
+  --lime: #c3f53c;
+  --magenta: #ff3d9a;
+  --cyan: #6fe3ea;
+  --orange: #ff7b2e;
+  --red: #ff4b4b;
+
+  --lime-a: rgba(195, 245, 60, 0.14);
+  --magenta-a: rgba(255, 61, 154, 0.14);
+  --cyan-a: rgba(111, 227, 234, 0.12);
+  --red-a: rgba(255, 75, 75, 0.14);
+
+  --font-ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+
+  --fs-label: 9.5px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-md: 13px;
+
+  --radius: 3px;
+  --radius-lg: 5px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --slow: 420ms;
+  --med: 240ms;
+  --fast: 140ms;
+
+  --sidebar-w: 216px;
+  --inspector-w: 264px;
+  --topbar-h: 34px;
+  --bar-h: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root { --slow: 0ms; --med: 0ms; --fast: 0ms; }
+}
+:root[data-motion='reduced'] { --slow: 0ms; --med: 0ms; --fast: 0ms; }
