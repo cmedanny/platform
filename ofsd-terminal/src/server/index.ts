@@ -97,4 +97,5 @@ app.listen(port, () => {
   const k = keyStatus();
   console.log(`\n  OFSD backend on http://localhost:${port}`);
   console.log(`  Claude key: ${k.anthropic ? 'found' : 'MISSING (add to .env)'}  ·  model: ${getEnv().model}\n`);
+  for (const m of serverModules) m.start?.();
 });

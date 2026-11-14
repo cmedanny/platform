@@ -20,6 +20,8 @@ export interface ServerModule {
   migrations?: Array<[id: string, sql: string]>;
   /** Extra HTTP routes, mounted at /api/m/<id>/... */
   routes?: (router: Router) => void;
+  /** Called once after the server starts (for schedulers and the like). */
+  start?: () => void;
   /** Count shown in the sidebar stats table (filings, theses, nodes...). */
   records?: () => number;
 }

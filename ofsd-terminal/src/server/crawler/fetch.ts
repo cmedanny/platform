@@ -22,6 +22,8 @@ export interface FetchOpts {
   accept?: string;
   /** Called with each decoded chunk as it streams in. */
   onChunk?: (text: string) => void;
+  /** Extra request headers (e.g. an API key). */
+  headers?: Record<string, string>;
   /** Explain non-2xx statuses in plain English. */
   explain?: (status: number) => string | undefined;
 }
@@ -43,6 +45,7 @@ export async function fetchStream(run: Run, url: string, opts: FetchOpts): Promi
         'User-Agent': opts.userAgent,
         Accept: opts.accept ?? 'text/html,application/xhtml+xml,application/json;q=0.9,text/plain;q=0.8,*/*;q=0.5',
         'Accept-Encoding': 'gzip, deflate, br',
+        ...opts.headers,
       },
       redirect: 'follow',
       signal: ctrl.signal,

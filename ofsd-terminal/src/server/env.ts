@@ -13,6 +13,9 @@ export interface Env {
   twitterKey: string;
   discordWebhook: string;
   port: number;
+  /** Test-only overrides so the app can run against local stand-ins. */
+  twitterBase: string;
+  discordBase: string;
 }
 
 const PLACEHOLDER_UA = /your name|you@example\.com/i;
@@ -38,6 +41,8 @@ export function getEnv(): Env {
     twitterKey: v('TWITTERAPI_IO_KEY'),
     discordWebhook: v('DISCORD_WEBHOOK_URL'),
     port: Number(v('PORT') || 8787),
+    twitterBase: (v('TWITTERAPI_BASE_URL') || 'https://api.twitterapi.io').replace(/\/$/, ''),
+    discordBase: v('DISCORD_API_BASE').replace(/\/$/, ''),
   };
 }
 

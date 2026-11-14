@@ -3,8 +3,8 @@
 A private, local workspace where you run Claude-powered research tools and watch them work live.
 Everything runs on your computer. API keys stay in one file (`.env`) that the browser never sees.
 
-**Build status:** Steps 1 and 2 of 4 done (app shell + web crawler).
-The thesis builder and brain screens are placeholders until steps 3 and 4.
+**Build status:** Steps 1 to 3 of 4 done (app shell, web crawler, thesis builder).
+The Brain screen is a placeholder until step 4.
 
 ---
 
@@ -113,6 +113,45 @@ Every crawl is saved. Reopen one from **Recent** in the inspector, or replay it 
 
 ---
 
+## Thesis builder
+
+### One-time setup
+
+1. **TwitterAPI.io key.** Sign up at <https://twitterapi.io>, open the dashboard, copy your API key, and paste it after
+   `TWITTERAPI_IO_KEY=` in `.env`. They charge per post returned; one run reads at most 400 posts.
+2. **Discord webhook for your private channel.** In Discord: hover the channel → gear icon (Edit Channel) →
+   **Integrations** → **Webhooks** → **New Webhook** → **Copy Webhook URL**. Paste it after `DISCORD_WEBHOOK_URL=` in `.env`.
+   Anyone with that URL can post to the channel, so keep it private like a password.
+3. **Your accounts.** In the app: **Thesis → Accounts**. Type a handle (or paste several at once), pick its tags
+   (rates, Fed, credit, FX, data) and press **Add**. Click a tag on any row to change it.
+
+### Daily use
+
+Press **Draft today's thesis** (or type `/thesis`). You'll see:
+
+- the last 24 hours of posts from your accounts streaming in as cards,
+- Claude tagging each one, which makes it dissolve into its theme cluster (rates, Fed, credit, FX, data, other),
+- the draft typing itself out: main view, 3 to 5 supporting points (each linked to its source posts), what would
+  invalidate it, and what to watch today.
+
+The draft then opens in the editor. Click any text to change it; it saves itself. It's labeled **DRAFT** until you edit it
+or press **Approve**. Hover a point to light up its source posts in the clusters, or click a source chip to open the post on X.
+
+**Send to Discord…** shows exactly what will be posted, and nothing goes out until you press **Send** there.
+Mentions are turned off, so it can't ping anyone. Nothing is ever posted automatically.
+
+Other controls in the inspector:
+
+- **Schedule:** turn on the daily auto-run and pick a time. It runs once a day while OFSD is open (if the app opens
+  after that time, it runs then). It only makes a draft.
+- **Style rules:** how the draft should sound. Defaults: short paragraphs, casual first person, no em dashes, no hype.
+- **Extra context:** crawls you attached from the crawler's Report tab (switch **Attach to thesis** on). Their key figures
+  and observations go into the draft.
+
+Every thesis is kept in **History** with the posts it used, and you can replay how it was built.
+
+---
+
 ## Settings you can change in `.env`
 
 | Line | What it does |
@@ -142,6 +181,11 @@ inside the same call ("server-side fallback"). It's on by default.
 | "SEC refused the request (403)" | `SEC_USER_AGENT` needs a real-looking name and email |
 | "Couldn't find ticker" | Check the spelling. EDGAR only has US-listed companies |
 | "found no readable text" | That page builds itself with JavaScript, which the crawler can't run |
+| "No TwitterAPI.io key yet" / "rejected the API key" | Paste or fix `TWITTERAPI_IO_KEY` in `.env` |
+| "out of credits" (TwitterAPI.io) | Top up your TwitterAPI.io balance |
+| "No accounts yet" | Thesis → Accounts → add some handles |
+| "No posts in the last 24 hours" | Your accounts were quiet, or the handles are misspelled (check the Last run column) |
+| "Discord rejected the webhook" | The webhook was deleted. Make a new one and update `DISCORD_WEBHOOK_URL` |
 | `Port 5173 is in use` | Another copy is already running. Close it, or use the browser tab it opened |
 
 Your saved runs live in `ofsd-terminal/data/ofsd.sqlite`. Back up that file to keep your history.
@@ -158,6 +202,7 @@ src/
     runs.ts                every run is an event timeline in SQLite (powers live view + replay)
     claude.ts              Claude streaming + plain-English errors
     crawler/               fetch (live network events), EDGAR lookups, streaming HTML parser, extractor, Claude analysis
+    thesis/                TwitterAPI.io search, Discord webhook sender
     modules/               one file per backend module
   web/                     React front end
     shell/                 sidebar, top bar, inspector, command log, command bar
@@ -165,6 +210,7 @@ src/
     styles/tokens.css      colors, type sizes, motion
     modules/               one folder per screen; registry.ts lists them
       crawler/             session (live/replay), spider rig + reader, raw/doc/network panes, HUD, report
+      thesis/              session, particle cluster field, live draft + editor, accounts, history
 ```
 
 Adding a module (for example a macro data panel) means: one folder in `src/web/modules/`, one line in
