@@ -40,5 +40,5 @@ export const terminal: ServerModule = {
       },
     },
   },
-  records: () => (db.prepare("SELECT COUNT(*) AS n FROM notes").get() as { n: number }).n,
+  records: () => 0,
 };

@@ -3,8 +3,7 @@
 A private, local workspace where you run Claude-powered research tools and watch them work live.
 Everything runs on your computer. API keys stay in one file (`.env`) that the browser never sees.
 
-**Build status:** Steps 1 to 3 of 4 done (app shell, web crawler, thesis builder).
-The Brain screen is a placeholder until step 4.
+**Build status:** All 4 steps done: app shell, web crawler, thesis builder, and Brain.
 
 ---
 
@@ -69,6 +68,7 @@ Next time, you only need: `cd` into the `ofsd-terminal` folder, then `npm start`
 | `/help` | Lists every command |
 | `/runs` | Opens the Runs list. Every command is saved and has a Replay button |
 | `/clear` | Clears the on-screen log (runs stay saved) |
+| `/note <text> #tag` | Saves a note to the Brain (first line is the title) |
 | ⌘K (Ctrl+K on Windows) | Jumps to the command bar from anywhere |
 | ↑ / ↓ in the bar | Previous commands |
 | Tab | Completes a slash command |
@@ -152,6 +152,25 @@ Every thesis is kept in **History** with the posts it used, and you can replay h
 
 ---
 
+## Brain
+
+Every crawl, thesis and note becomes a node. Open **Brain** in the sidebar.
+
+- **Views** (inspector → Form): **Clusters** (a slowly turning particle sphere per group; drag to turn it),
+  **Grid** (cards), **Timeline** (one lane per group, the lime line is now) and **Table** (click a column to sort).
+- **Group by** ticker, theme or date. **Show** turns crawls, theses or notes on and off. The filter box at the top
+  matches tickers, themes and titles.
+- **Click a node** to open it: a crawl opens its report, a thesis opens in the thesis editor, a note opens in a side panel.
+- **Links** (the thin cyan lines) connect a thesis to the crawls attached to it, and anything that mentions a ticker
+  to that ticker's latest crawl. Hover a node to light up its links.
+- Shapes: square = crawl, diamond = thesis, circle = note. Lime = created today.
+
+**Notes:** press **New note**, or type `/note NVDA guide implies more upside #semis` in the command bar. The first line
+becomes the title and `#words` become themes. Write `$TICKER` in a note to link it to that ticker's crawls.
+Notes are your own writing, so they're never labeled DRAFT.
+
+---
+
 ## Settings you can change in `.env`
 
 | Line | What it does |
@@ -211,6 +230,7 @@ src/
     modules/               one folder per screen; registry.ts lists them
       crawler/             session (live/replay), spider rig + reader, raw/doc/network panes, HUD, report
       thesis/              session, particle cluster field, live draft + editor, accounts, history
+      brain/               node model, Clusters + Timeline canvases, Grid, Table, note drawer
 ```
 
 Adding a module (for example a macro data panel) means: one folder in `src/web/modules/`, one line in

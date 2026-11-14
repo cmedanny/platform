@@ -9,7 +9,7 @@ import type { ModuleDef } from '../types.ts';
 import { Editor, LiveDraft } from './Draft.tsx';
 import { Field } from './Field.tsx';
 import { Accounts, History, useHandles } from './Lists.tsx';
-import { openThesisSession, useThesisSession } from './session.ts';
+import { closeThesisSession, openThesisSession, useThesisSession } from './session.ts';
 import './thesis.css';
 
 const ID = 'thesis';
@@ -179,6 +179,7 @@ function Canvas() {
         {tab === 'history' && (
           <History
             onOpen={(id) => {
+              closeThesisSession();
               setPref('thesisId', id);
               setTab('today');
             }}
