@@ -9,6 +9,18 @@ Everything runs on your computer. API keys stay in one file (`.env`) that the br
 
 ## First-time setup (about 5 minutes)
 
+**On Windows, the easy way:**
+
+1. Install Node.js: go to <https://nodejs.org>, download **LTS**, run it, click Next through it.
+2. Download OFSD as a ZIP: <https://github.com/cmedanny/platform/archive/refs/heads/claude/ofsd-terminal-app-mpn1kb.zip>
+3. Right-click the ZIP → **Extract All** → **Extract**.
+4. Open the extracted folder, then the **ofsd-terminal** folder, and double-click **Start-OFSD-Windows.bat**.
+   (If Windows says "Windows protected your PC", click **More info** → **Run anyway**. It's the starter in this folder.)
+5. The first time, it installs everything and opens Notepad: paste your Claude key after `ANTHROPIC_API_KEY=`,
+   put your name and email in `SEC_USER_AGENT`, press Ctrl+S, close Notepad. Your browser opens OFSD Terminal.
+
+Next time, just double-click **Start-OFSD-Windows.bat** again. The steps below are the manual way (and for Mac).
+
 ### 1. Install Node.js (once)
 
 Go to <https://nodejs.org>, download the **LTS** installer, and run it. Version 22.13 or newer is needed.

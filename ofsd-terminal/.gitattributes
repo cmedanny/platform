@@ -1,0 +1,2 @@
+# Keep Windows line endings in the starter script exactly as committed
+*.bat -text
