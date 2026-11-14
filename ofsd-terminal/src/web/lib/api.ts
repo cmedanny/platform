@@ -1,8 +1,19 @@
 import type { CommandResponse, Health, ModuleStats, RunDetail, RunEvent, RunSummary } from '../../shared/types.ts';
+import { HttpError, localRequest } from '../local/engine.ts';
+import { followLocal } from '../local/runs.ts';
+import { IS_ARTIFACT } from './platform.ts';
 
 export class BackendError extends Error {}
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  if (IS_ARTIFACT) {
+    // The Claude-app version answers in the page itself.
+    try {
+      return (await localRequest(init?.method ?? 'GET', path, init?.body ? JSON.parse(String(init.body)) : {})) as T;
+    } catch (err) {
+      throw new BackendError(err instanceof HttpError ? err.message : `Something went wrong: ${(err as Error).message}`);
+    }
+  }
   let res: Response;
   try {
     res = await fetch(path, { ...init, headers: { 'Content-Type': 'application/json', ...init?.headers } });
@@ -33,6 +44,7 @@ export const api = {
  * (which re-sends stored events) never double-prints.
  */
 export function followRun(id: string, onEvent: (e: RunEvent) => void, onLost: () => void) {
+  if (IS_ARTIFACT) return followLocal(id, onEvent, onLost);
   const es = new EventSource(`/api/runs/${id}/stream`);
   let last = -1;
   let ended = false;

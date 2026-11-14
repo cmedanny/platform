@@ -50,42 +50,28 @@ export function docBlock(title: string, source: string, text: string): Anthropic
   };
 }
 
-export function analysisMessages(doc: Anthropic.Beta.BetaTextBlockParam, figs: KeyFigure[]): Anthropic.Beta.BetaMessageParam[] {
+/** The analysis instructions that follow the document (shared with the Claude-app version). */
+export function analysisInstructions(figs: KeyFigure[]) {
   const cand = figs.length
     ? `Key figure candidates extracted from the financial statements (id | line item | current period | prior period | change | statement | unit):\n${figureLines(figs)}`
     : 'No financial statement tables were found, so there are no key figure candidates.';
-  return [
-    {
-      role: 'user',
-      content: [
-        doc,
-        {
-          type: 'text',
-          text: `${cand}
+  return `${cand}
 
 Analyze the document. Reply in exactly this line format and nothing else:
 SUMMARY: 2 to 4 sentences on what this document is and what changed. One line.
 KEY: comma-separated ids of the 8 to 16 most important figures above, most important first. Write KEY: none if there are no candidates.
-OBS: one observation per line, 5 to 8 lines total. Each is one or two specific sentences with numbers, ending with the figure ids it relies on in square brackets, like [f1, f4]. Use [] when it relies on none.`,
-        },
-      ],
-    },
-  ];
+OBS: one observation per line, 5 to 8 lines total. Each is one or two specific sentences with numbers, ending with the figure ids it relies on in square brackets, like [f1, f4]. Use [] when it relies on none.`;
+}
+
+export const askInstruction = (question: string) =>
+  `Answer this question using only the document above. Cite pages or sections like (p. 12) or (§12) when the document has those markers. Short paragraphs.\n\nQuestion: ${question}`;
+
+export function analysisMessages(doc: Anthropic.Beta.BetaTextBlockParam, figs: KeyFigure[]): Anthropic.Beta.BetaMessageParam[] {
+  return [{ role: 'user', content: [doc, { type: 'text', text: analysisInstructions(figs) }] }];
 }
 
 export function askMessages(doc: Anthropic.Beta.BetaTextBlockParam, question: string): Anthropic.Beta.BetaMessageParam[] {
-  return [
-    {
-      role: 'user',
-      content: [
-        doc,
-        {
-          type: 'text',
-          text: `Answer this question using only the document above. Cite pages like (p. 12) when the document has page markers. Short paragraphs.\n\nQuestion: ${question}`,
-        },
-      ],
-    },
-  ];
+  return [{ role: 'user', content: [doc, { type: 'text', text: askInstruction(question) }] }];
 }
 
 /** Parses the SUMMARY/KEY/OBS stream line by line as it arrives. */
