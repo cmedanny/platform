@@ -1,4 +1,4 @@
-.app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); height: 100vh; }
+.app { display: grid; grid-template-columns: var(--sidebar-w) minmax(0, 1fr); height: 100%; }
 
 /* ---------- Sidebar ---------- */
 .sidebar {
@@ -67,6 +67,7 @@
 .conn { display: flex; align-items: center; gap: 12px; }
 .conn__item { display: flex; align-items: center; gap: 5px; font-size: var(--fs-label); letter-spacing: 0.1em; color: var(--text-dim); text-transform: uppercase; }
 .conn__item--off { color: var(--text-faint); }
+.conn__item--warn { color: var(--red); }
 .topbar__clock { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); }
 .offline { color: var(--red); font-size: var(--fs-label); letter-spacing: 0.1em; text-transform: uppercase; display: flex; align-items: center; gap: 5px; }
 
@@ -146,6 +147,12 @@
 .suggest__desc { font-size: var(--fs-xs); color: var(--text-dim); }
 .suggest__soon { color: var(--text-faint); font-size: 10px; margin-left: 4px; }
 
+@media (max-width: 700px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .sidebar { display: none; }
+  .inspector-wrap { display: none; }
+  .topbar__title span { display: none; }
+}
 @media (max-width: 900px) {
   :root { --sidebar-w: 180px; --inspector-w: 230px; }
   .conn { display: none; }

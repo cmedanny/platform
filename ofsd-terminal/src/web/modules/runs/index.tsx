@@ -4,7 +4,7 @@ import { api } from '../../lib/api.ts';
 import { replayRun } from '../../lib/commands.ts';
 import { dayKey, duration, stamp } from '../../lib/format.ts';
 import { useStore, usePref } from '../../lib/store.ts';
-import { Badge, EmptyState, Row, Section, Segmented, Select, StatusDot, Switch } from '../../ui/index.tsx';
+import { Badge, ConfirmButton, EmptyState, Row, Section, Segmented, Select, StatusDot, Switch } from '../../ui/index.tsx';
 import { LinesGlyph } from '../glyphs.tsx';
 import { modules } from '../registry.ts';
 import type { ModuleDef } from '../types.ts';
@@ -116,18 +116,16 @@ function Canvas() {
                   >
                     ▶ Replay
                   </button>
-                  <button
+                  <ConfirmButton
                     className="iconbtn"
                     title="Delete run"
-                    onClick={async () => {
-                      if (window.confirm('Delete this run and its timeline?')) {
-                        await api.deleteRun(r.id).catch(() => {});
-                        bump();
-                      }
+                    label="×"
+                    confirmLabel="Delete?"
+                    onConfirm={async () => {
+                      await api.deleteRun(r.id).catch(() => {});
+                      bump();
                     }}
-                  >
-                    ×
-                  </button>
+                  />
                 </td>
               </tr>
             </Fragment>

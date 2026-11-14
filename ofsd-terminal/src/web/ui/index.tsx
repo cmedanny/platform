@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import type { RunStatus } from '../../shared/types.ts';
 
 /** Tiny uppercase letter-spaced label (ARRANGEMENT, FORM, AXES...). */
@@ -161,3 +161,31 @@ export const SearchIcon = () => (
     <path d="M11 11l3.5 3.5" strokeLinecap="round" />
   </svg>
 );
+
+/**
+ * A delete-style button that asks for a second click instead of a browser
+ * confirm dialog (which the Claude app doesn't show).
+ */
+export function ConfirmButton({ label, confirmLabel = 'Click again to confirm', onConfirm, className = 'btn btn--ghost', title }: { label: React.ReactNode; confirmLabel?: string; onConfirm: () => void; className?: string; title?: string }) {
+  const [armed, setArmed] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 3500);
+    return () => clearTimeout(t);
+  }, [armed]);
+  return (
+    <button
+      className={`${className} ${armed ? 'btn--armed' : ''}`}
+      title={title}
+      onClick={(e) => {
+        e.stopPropagation();
+        if (armed) {
+          setArmed(false);
+          onConfirm();
+        } else setArmed(true);
+      }}
+    >
+      {armed ? confirmLabel : label}
+    </button>
+  );
+}

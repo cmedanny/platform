@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import type { CrawlListItem, KeyFigure } from '../../../shared/crawl.ts';
 import { api } from '../../lib/api.ts';
+import { exportCrawl } from '../../lib/exports.ts';
+import { PAGE_LABEL } from '../../lib/platform.ts';
 import { usePref } from '../../lib/store.ts';
 import { Draft, Label, Switch } from '../../ui/index.tsx';
 import type { CrawlSession } from './session.ts';
@@ -14,6 +16,7 @@ export function Report({ s }: { s: CrawlSession }) {
   const [, setView] = usePref<'live' | 'report'>('crawler', 'view', 'live');
   const [showAll, setShowAll] = useState(false);
   const [attached, setAttached] = useState<boolean | null>(null);
+  const [exportErr, setExportErr] = useState('');
   const crawlId = s.meta?.crawlId;
 
   useEffect(() => {
@@ -47,7 +50,7 @@ export function Report({ s }: { s: CrawlSession }) {
             {s.meta?.filed && <>filed {s.meta.filed} · </>}
             {s.parsed && (
               <>
-                {s.parsed.pages} pages · {s.parsed.values.toLocaleString()} values
+                {s.parsed.pages} {PAGE_LABEL === '§' ? 'sections' : 'pages'} · {s.parsed.values.toLocaleString()} values
               </>
             )}
           </div>
@@ -65,16 +68,25 @@ export function Report({ s }: { s: CrawlSession }) {
             />
             Attach to thesis
           </label>
-          <a className={`btn ${done ? '' : 'btn--disabled'}`} href={done && crawlId ? `/api/m/crawler/${crawlId}/export.csv` : undefined} download>
-            Export CSV
-          </a>
-          <a className={`btn ${done ? '' : 'btn--disabled'}`} href={done && crawlId ? `/api/m/crawler/${crawlId}/export.xlsx` : undefined} download>
-            Export Excel
-          </a>
+          {(['csv', 'xlsx'] as const).map((fmt) => (
+            <button
+              key={fmt}
+              className="btn"
+              disabled={!done || !crawlId}
+              onClick={async () => {
+                if (!crawlId) return;
+                const base = (s.meta?.ticker ? `${s.meta.ticker}-${s.meta.form}` : 'crawl').replace(/[^\w-]+/g, '_');
+                setExportErr((await exportCrawl({ crawlId, base, figures: s.figures, key: s.key, summary: s.summary, obs: s.obs }, fmt)) ?? '');
+              }}
+            >
+              {fmt === 'csv' ? 'Export CSV' : 'Export Excel'}
+            </button>
+          ))}
         </div>
       </div>
 
       {s.status === 'error' && <div className="report__error">{s.error || 'This crawl failed.'}</div>}
+      {exportErr && <div className="report__error">{exportErr}</div>}
 
       <section className="report__block">
         <div className="report__label">
@@ -118,7 +130,7 @@ export function Report({ s }: { s: CrawlSession }) {
                   <td className="dim">{STMT[f.statement] ?? f.statement}</td>
                   <td>
                     <button className="linkbtn mono" onClick={() => goTo(f)} title="Send the spider to this figure">
-                      p. {f.page} ↗
+                      {PAGE_LABEL} {f.page} ↗
                     </button>
                   </td>
                 </tr>

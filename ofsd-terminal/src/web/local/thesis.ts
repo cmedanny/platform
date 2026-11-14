@@ -235,3 +235,5 @@ export function setThesisStatus(id: string, status: 'approved' | 'sent') {
   store.put('theses', id, next);
   return next;
 }
+
+export const hasPendingPosts = () => pending.trim().length > 0;

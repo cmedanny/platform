@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { execute } from '../../lib/commands.ts';
+import { PAGE_LABEL } from '../../lib/platform.ts';
 import { usePref } from '../../lib/store.ts';
 import { Kbd, Segmented } from '../../ui/index.tsx';
 import { speedNow } from './DocPane.tsx';
@@ -15,7 +16,7 @@ function phaseText(s: CrawlSession) {
   if (reader && !s.readerDone) {
     const tok = reader.cur >= 0 ? s.tokens[reader.cur] : undefined;
     const page = tok ? s.blocks[tok.b]?.page : undefined;
-    return page && pages ? `reading p. ${page} / ${pages}` : 'reading';
+    return page && pages ? `reading ${PAGE_LABEL} ${page} / ${pages}` : 'reading';
   }
   if (s.status === 'running') return 'Claude analyzing';
   return 'done';

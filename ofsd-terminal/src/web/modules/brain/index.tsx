@@ -3,7 +3,7 @@ import type { BrainNode, Note, NodeKind } from '../../../shared/brain.ts';
 import { api } from '../../lib/api.ts';
 import { stamp } from '../../lib/format.ts';
 import { useStore, usePref } from '../../lib/store.ts';
-import { Badge, Draft, EmptyState, Row, Section, Segmented, Select, Switch } from '../../ui/index.tsx';
+import { Badge, ConfirmButton, Draft, EmptyState, Row, Section, Segmented, Select, Switch } from '../../ui/index.tsx';
 import { NetworkGlyph } from '../glyphs.tsx';
 import type { ModuleDef } from '../types.ts';
 import { Clusters } from './Clusters.tsx';
@@ -188,17 +188,15 @@ function NoteDrawer({ id, onClose, onChanged }: { id: string; onClose: () => voi
       />
       <textarea ref={body} className="br-drawer__body" value={note.body} placeholder="Write… mention $TICKERS to link this note to crawls." onChange={(e) => edit({ body: e.target.value })} />
       <div className="br-drawer__foot">
-        <button
-          className="btn btn--ghost"
-          onClick={async () => {
-            if (!window.confirm('Delete this note?')) return;
+        <ConfirmButton
+          label="Delete"
+          confirmLabel="Delete note?"
+          onConfirm={async () => {
             await api.del(`/api/m/brain/notes/${id}`);
             onChanged();
             onClose();
           }}
-        >
-          Delete
-        </button>
+        />
       </div>
     </aside>
   );

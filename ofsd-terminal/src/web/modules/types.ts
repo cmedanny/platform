@@ -16,6 +16,8 @@ export interface ClientCommand {
   hidden?: boolean;
   /** Shown greyed in autocomplete while the feature isn't built yet. */
   soon?: string;
+  /** Runs first; return false to stop (e.g. to open a panel that collects input). */
+  before?: (args: string) => boolean;
   /** Rewrites the arguments before sending (e.g. adds a default form type). */
   transform?: (args: string) => string;
   /** Called once the backend has started the run. */

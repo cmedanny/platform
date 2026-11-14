@@ -1,4 +1,7 @@
 import type { Health } from '../../../shared/types.ts';
+import { useEffect, useState } from 'react';
+import { api } from '../../lib/api.ts';
+import { IS_ARTIFACT } from '../../lib/platform.ts';
 import { useStore } from '../../lib/store.ts';
 import { Label, Section, Segmented } from '../../ui/index.tsx';
 import type { ModuleDef } from '../types.ts';
@@ -59,6 +62,69 @@ function Canvas() {
   );
 }
 
+function AppCanvas() {
+  const health = useStore((s) => s.health);
+  const [storage, setStorage] = useState<{ mode: string; problem: string } | null>(null);
+  useEffect(() => {
+    api.get<{ mode: string; problem: string }>('/api/storage').then(setStorage).catch(() => {});
+  }, []);
+  const rows = [
+    {
+      ok: !!health?.keys.anthropic,
+      name: 'Claude',
+      state: health?.keys.anthropic ? 'Uses your Claude plan' : 'Not available here',
+      used: 'Ask, crawl analysis, theses',
+      how: 'Nothing to set up. The first time OFSD asks Claude, the app asks you to allow it.',
+    },
+    {
+      ok: !!health?.keys.sec,
+      name: 'Robinhood connector',
+      state: health?.keys.sec ? 'Connected' : 'Not connected',
+      used: 'Crawler (SEC filings)',
+      how: 'claude.ai → Settings → Connectors → Robinhood. Allow OFSD to use it when asked.',
+    },
+    {
+      ok: storage?.mode === 'saved' && !storage.problem,
+      name: 'Storage',
+      state: storage?.mode === 'saved' ? (storage.problem ? 'Problem' : 'Saving') : storage?.mode === 'memory' ? 'This session only' : 'Loading',
+      used: 'Runs, crawls, theses, notes',
+      how: storage?.problem || 'Saved privately to your Claude account. Nobody else can read it, even if you share the page.',
+    },
+  ];
+  return (
+    <div style={{ padding: '18px 22px', maxWidth: 880 }}>
+      <Label>Connections</Label>
+      <table className="table" style={{ marginTop: 8 }}>
+        <thead>
+          <tr>
+            <th style={{ width: 24 }} />
+            <th>Service</th>
+            <th>Used by</th>
+            <th>How</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((r) => (
+            <tr key={r.name}>
+              <td><span className={`dot ${r.ok ? 'dot--ok' : 'dot--off'}`} /></td>
+              <td className="bright">{r.name}<div className="dim" style={{ fontSize: 10 }}>{r.state}</div></td>
+              <td className="dim">{r.used}</td>
+              <td className="dim">{r.how}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <div style={{ marginTop: 22, display: 'grid', gridTemplateColumns: '170px 1fr', rowGap: 10, fontSize: 12 }}>
+        <span className="dim">Not in this version</span>
+        <span className="dim">
+          Reading web pages, pulling X posts automatically, posting to Discord and the daily auto-run need a program running on a computer, which a
+          page inside the Claude app can’t do. Paste posts into the thesis builder instead, and copy the finished thesis into Discord.
+        </span>
+      </div>
+    </div>
+  );
+}
+
 function Inspector() {
   const motion = useStore((s) => s.motion);
   const setMotion = useStore((s) => s.setMotion);
@@ -84,8 +150,8 @@ function Inspector() {
 export const settings: ModuleDef = {
   id: 'settings',
   title: 'Settings',
-  blurb: 'Keys, model and motion',
-  Canvas,
+  blurb: IS_ARTIFACT ? 'Connections, storage and motion' : 'Keys, model and motion',
+  Canvas: IS_ARTIFACT ? AppCanvas : Canvas,
   Inspector,
   placement: 'footer',
   stats: false,

@@ -20,6 +20,7 @@ const isBoldLine = (s: string) => /^\*\*[^*].*\*\*$/.test(s.trim());
 export class MarkdownDocParser {
   private nextId = 0;
   private recentHeads: string[] = [];
+  private lastText = '';
   private seenStmt = new Set<StatementKind>();
 
   constructor(
@@ -61,7 +62,7 @@ export class MarkdownDocParser {
       const block: DocBlock = { id: this.nextId++, t: 'table', rows, page, src: t.src, tokens: [] };
       const stmt = this.detectStatement(rows);
       if (stmt) block.stmt = stmt;
-      this.extractor.table(block, (r, c, s) => this.locate(rows[r]?.[c]?.x.slice(s, s + 12) ?? '', t.src), this.recentHeads.join(' '));
+      this.extractor.table(block, (r, c, s) => this.locate(rows[r]?.[c]?.x.slice(s, s + 12) ?? '', t.src), `${this.recentHeads.join(' ')} ${this.lastText}`);
       this.onBlock(block);
     };
 
@@ -105,6 +106,7 @@ export class MarkdownDocParser {
   private emitText(text: string, t: 'p' | 'h', page: number, src: number) {
     const block: DocBlock = { id: this.nextId++, t, text, page, src, tokens: [] };
     this.extractor.prose(block as Extract<DocBlock, { t: 'p' | 'h' }>, (s) => this.locate(text.slice(s, s + 12), src));
+    this.lastText = text.slice(0, 200);
     if (t === 'h') {
       this.recentHeads.push(text);
       if (this.recentHeads.length > 5) this.recentHeads.shift();

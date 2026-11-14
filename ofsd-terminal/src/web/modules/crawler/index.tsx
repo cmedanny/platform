@@ -3,6 +3,7 @@ import type { CrawlListItem } from '../../../shared/crawl.ts';
 import { api } from '../../lib/api.ts';
 import { execute } from '../../lib/commands.ts';
 import { stamp } from '../../lib/format.ts';
+import { IS_ARTIFACT } from '../../lib/platform.ts';
 import { useStore, usePref } from '../../lib/store.ts';
 import { EmptyState, Row, Section, Segmented, Select, Switch } from '../../ui/index.tsx';
 import { SpiderGlyph } from '../glyphs.tsx';
@@ -75,10 +76,18 @@ function Canvas() {
       <EmptyState
         glyph={<SpiderGlyph />}
         title="No crawl open"
-        text="Point the spider at an SEC filing or any URL. It reads the real document live and pulls out every figure."
+        text={
+          IS_ARTIFACT
+            ? 'Point the spider at an SEC filing. It reads the real filing through your Robinhood connector, live, and pulls out every figure.'
+            : 'Point the spider at an SEC filing or any URL. It reads the real document live and pulls out every figure.'
+        }
       >
         <button className="chip" onClick={() => setDraft('/crawl NVDA 10-Q')}>/crawl NVDA 10-Q</button>
-        <button className="chip" onClick={() => setDraft('/crawl https://')}>/crawl &lt;url&gt;</button>
+        {IS_ARTIFACT ? (
+          <button className="chip" onClick={() => setDraft('/crawl AAPL 10-K')}>/crawl AAPL 10-K</button>
+        ) : (
+          <button className="chip" onClick={() => setDraft('/crawl https://')}>/crawl &lt;url&gt;</button>
+        )}
         {list && list.length > 0 && (
           <div style={{ width: 320, marginTop: 14, textAlign: 'left' }}>
             <span className="label">Recent crawls</span>
@@ -117,14 +126,14 @@ function Inspector() {
   const [trail, setTrail] = usePref(ID, 'trail', true);
   const list = useCrawls();
   const go = () => {
-    if (source === 'EDGAR' && ticker.trim()) execute(`/crawl ${ticker.trim().toUpperCase()} ${form}`);
+    if ((source === 'EDGAR' || IS_ARTIFACT) && ticker.trim()) execute(`/crawl ${ticker.trim().toUpperCase()} ${form}`);
     if (source === 'URL' && url.trim()) execute(`/crawl ${url.trim()}`);
   };
   return (
     <>
       <Section title="New crawl">
-        <Segmented options={['EDGAR', 'URL'] as const} value={source} onChange={setSource} />
-        {source === 'EDGAR' ? (
+        {!IS_ARTIFACT && <Segmented options={['EDGAR', 'URL'] as const} value={source} onChange={setSource} />}
+        {source === 'EDGAR' || IS_ARTIFACT ? (
           <>
             <Row label="Ticker">
               <input className="input mono" style={{ width: 92 }} value={ticker} placeholder="NVDA" onChange={(e) => setTicker(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && go()} />
@@ -164,13 +173,13 @@ function Inspector() {
 export const crawler: ModuleDef = {
   id: ID,
   title: 'Crawler',
-  blurb: 'Live document reading · SEC EDGAR or any URL',
+  blurb: IS_ARTIFACT ? 'Live filing reading · SEC filings via Robinhood' : 'Live document reading · SEC EDGAR or any URL',
   Canvas,
   Inspector,
   commands: [
     {
       name: 'crawl',
-      usage: '/crawl NVDA 10-Q | <url>',
+      usage: IS_ARTIFACT ? '/crawl NVDA 10-Q' : '/crawl NVDA 10-Q | <url>',
       description: 'Crawl a filing or web page live.',
       // "/crawl NVDA" uses the default form from the inspector
       transform: (args) => {

@@ -1,14 +1,21 @@
 import { useEffect, useState } from 'react';
+import { api } from '../lib/api.ts';
 import { clock } from '../lib/format.ts';
+import { IS_ARTIFACT } from '../lib/platform.ts';
 import { useStore } from '../lib/store.ts';
 import type { ModuleDef } from '../modules/types.ts';
 
-const CONN = [
-  { key: 'anthropic', label: 'Claude' },
-  { key: 'sec', label: 'EDGAR' },
-  { key: 'twitter', label: 'X' },
-  { key: 'discord', label: 'Discord' },
-] as const;
+const CONN = IS_ARTIFACT
+  ? ([
+      { key: 'anthropic', label: 'Claude plan' },
+      { key: 'sec', label: 'Robinhood' },
+    ] as const)
+  : ([
+      { key: 'anthropic', label: 'Claude' },
+      { key: 'sec', label: 'EDGAR' },
+      { key: 'twitter', label: 'X' },
+      { key: 'discord', label: 'Discord' },
+    ] as const);
 
 export function TopBar({ mod }: { mod: ModuleDef }) {
   const health = useStore((s) => s.health);
@@ -17,6 +24,14 @@ export function TopBar({ mod }: { mod: ModuleDef }) {
   const toggle = useStore((s) => s.toggleInspector);
   const open = useStore((s) => s.open);
   const [now, setNow] = useState(() => new Date());
+  const [storage, setStorage] = useState<{ mode: string; problem: string } | null>(null);
+  useEffect(() => {
+    if (!IS_ARTIFACT) return;
+    const load = () => api.get<{ mode: string; problem: string }>('/api/storage').then(setStorage).catch(() => {});
+    load();
+    const t = setInterval(load, 15000);
+    return () => clearInterval(t);
+  }, []);
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 10000);
     return () => clearInterval(t);
@@ -43,6 +58,12 @@ export function TopBar({ mod }: { mod: ModuleDef }) {
               );
             })}
           </button>
+        )}
+        {storage && storage.mode !== 'loading' && (
+          <span className={`conn__item ${storage.mode === 'saved' && !storage.problem ? '' : 'conn__item--warn'}`} title={storage.problem || 'Saved privately in your Claude account'}>
+            <span className={`dot ${storage.mode === 'saved' && !storage.problem ? 'dot--ok' : 'dot--error'}`} />
+            {storage.mode === 'saved' && !storage.problem ? 'Saved' : 'Not saving'}
+          </span>
         )}
         <span className="topbar__clock">{clock(now)}</span>
         {mod.Inspector && (

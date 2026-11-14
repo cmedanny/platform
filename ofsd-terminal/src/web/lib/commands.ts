@@ -55,6 +55,8 @@ export async function execute(raw: string, display?: string) {
     return;
   }
 
+  if (cmd.before && !cmd.before(args)) return;
+
   if (cmd.local || cmd.soon) {
     const id = s.addEntry({ command: text, source: 'local' });
     let failed = false;

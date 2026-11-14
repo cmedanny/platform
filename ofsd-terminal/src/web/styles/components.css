@@ -147,3 +147,5 @@
 .table td { padding: 6px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
 .table tr:hover td { background: var(--hover); }
 .table .num { text-align: right; font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.btn--armed, .btn--armed:hover { color: var(--red); border-color: rgba(255, 75, 75, 0.5); background: var(--red-a); white-space: nowrap; }
+.iconbtn.btn--armed { width: auto; padding: 0 6px; font-size: 10px; }

@@ -1,9 +1,10 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { thesisToText, type ParsedStream, type ThesisDraft, type ThesisRecord, type XPost } from '../../../shared/thesis.ts';
 import { api } from '../../lib/api.ts';
+import { IS_ARTIFACT } from '../../lib/platform.ts';
 import { stamp } from '../../lib/format.ts';
 import { useStore } from '../../lib/store.ts';
-import { Badge, Draft as DraftBadge } from '../../ui/index.tsx';
+import { Badge, ConfirmButton, Draft as DraftBadge } from '../../ui/index.tsx';
 
 const H = ({ children }: { children: string }) => <div className="th-h">{children}</div>;
 
@@ -14,6 +15,12 @@ function Sources({ refs, posts, onHover }: { refs: string[]; posts: Map<string, 
       {refs.map((r) => {
         const p = posts.get(r);
         if (!p) return null;
+        if (!p.url)
+          return (
+            <span key={r} className="chip th-chip" title={p.text} onMouseEnter={() => onHover?.([r])} onMouseLeave={() => onHover?.(null)}>
+              @{p.handle}
+            </span>
+          );
         return (
           <a
             key={r}
@@ -117,6 +124,7 @@ export function Editor({ rec, onChange, onHover, onDeleted }: { rec: ThesisRecor
   const [sending, setSending] = useState(false);
   const [err, setErr] = useState('');
   const [copied, setCopied] = useState(false);
+  const [copiedForDiscord, setCopiedForDiscord] = useState(false);
   const discordOk = useStore((s) => s.health?.keys.discord);
   const dirty = useRef(false);
   const byRef = new Map(rec.posts.map((p) => [p.ref, p]));
@@ -238,23 +246,54 @@ export function Editor({ rec, onChange, onHover, onDeleted }: { rec: ThesisRecor
         >
           {copied ? 'Copied' : 'Copy text'}
         </button>
-        <button
-          className="btn btn--ghost"
-          onClick={async () => {
-            if (!window.confirm('Delete this thesis? This cannot be undone.')) return;
+        <ConfirmButton
+          label="Delete"
+          confirmLabel="Delete for good?"
+          onConfirm={async () => {
             await api.del(`/api/m/thesis/${rec.id}`).catch(() => {});
             onDeleted();
           }}
-        >
-          Delete
-        </button>
+        />
         <span className="th-actions__spacer" />
         {rec.sentAt && <span className="th-sent mono">sent {stamp(rec.sentAt)} ✓</span>}
-        <button className="btn btn--primary" disabled={!discordOk || saving === 'saving'} onClick={() => setConfirm(true)} title={discordOk ? 'Preview, then send to your private Discord channel' : 'Add DISCORD_WEBHOOK_URL to .env first'}>
-          {rec.sentAt ? 'Send again…' : 'Send to Discord…'}
-        </button>
+        {IS_ARTIFACT ? (
+          <>
+            {copiedForDiscord && !rec.sentAt && (
+              <button
+                className="btn"
+                onClick={async () => {
+                  try {
+                    onChange(await api.post<ThesisRecord>(`/api/m/thesis/${rec.id}/send`, {}));
+                  } catch (e) {
+                    setErr(e instanceof Error ? e.message : String(e));
+                  }
+                }}
+              >
+                Mark as sent
+              </button>
+            )}
+            <button
+              className="btn btn--primary"
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(text);
+                  setCopiedForDiscord(true);
+                } catch {
+                  setErr("Couldn't copy automatically. Use Copy text, or select the text and press Ctrl+C.");
+                }
+              }}
+            >
+              {copiedForDiscord ? 'Copied for Discord' : 'Copy for Discord'}
+            </button>
+          </>
+        ) : (
+          <button className="btn btn--primary" disabled={!discordOk || saving === 'saving'} onClick={() => setConfirm(true)} title={discordOk ? 'Preview, then send to your private Discord channel' : 'Add DISCORD_WEBHOOK_URL to .env first'}>
+            {rec.sentAt ? 'Send again…' : 'Send to Discord…'}
+          </button>
+        )}
       </div>
-      {!discordOk && <div className="th-hint">Discord isn't connected yet. Add your private channel's webhook to .env (see Settings).</div>}
+      {IS_ARTIFACT && copiedForDiscord && <div className="th-hint">Copied with Discord formatting. Paste it into your private channel.</div>}
+      {!IS_ARTIFACT && !discordOk && <div className="th-hint">Discord isn't connected yet. Add your private channel's webhook to .env (see Settings).</div>}
 
       {confirm && (
         <div className="th-confirm" role="dialog" aria-label="Send to Discord">

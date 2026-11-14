@@ -10,6 +10,9 @@ import { Editor, LiveDraft } from './Draft.tsx';
 import { Field } from './Field.tsx';
 import { Accounts, History, useHandles } from './Lists.tsx';
 import { closeThesisSession, openThesisSession, useThesisSession } from './session.ts';
+import { IS_ARTIFACT } from '../../lib/platform.ts';
+import { PastePanel } from './Paste.tsx';
+import { hasPendingPosts } from '../../local/thesis.ts';
 import './thesis.css';
 
 const ID = 'thesis';
@@ -94,7 +97,7 @@ function Today({ goAccounts }: { goAccounts: () => void }) {
 
   if (!live && !rec) {
     if (loading) return null;
-    const none = handles && handles.length === 0;
+    const none = !IS_ARTIFACT && handles && handles.length === 0;
     return (
       <EmptyState
         glyph={<ClusterGlyph />}
@@ -102,7 +105,9 @@ function Today({ goAccounts }: { goAccounts: () => void }) {
         text={
           none
             ? 'Pick the X accounts you read for macro and rates. The thesis builder pulls their last 24 hours each morning.'
-            : 'Pull the last 24 hours from your accounts, cluster it by theme, and draft today’s view for you to edit.'
+            : IS_ARTIFACT
+              ? 'Paste today’s posts from your macro and rates accounts. Claude clusters them by theme and drafts today’s view for you to edit.'
+              : 'Pull the last 24 hours from your accounts, cluster it by theme, and draft today’s view for you to edit.'
         }
       >
         {none ? (
@@ -110,7 +115,7 @@ function Today({ goAccounts }: { goAccounts: () => void }) {
             Add accounts
           </button>
         ) : (
-          <button className="chip" onClick={() => execute('/thesis')}>
+          <button className="chip" onClick={() => draftThesis()}>
             /thesis
           </button>
         )}
@@ -148,8 +153,15 @@ function Today({ goAccounts }: { goAccounts: () => void }) {
   );
 }
 
+/** Local server: run /thesis. Claude app: open the paste panel first. */
+function draftThesis() {
+  if (IS_ARTIFACT) useStore.getState().setPref(ID, 'paste', true);
+  else execute('/thesis');
+}
+
 function Canvas() {
   const [tab, setTab] = usePref<Tab>(ID, 'tab', 'today');
+  const [paste, setPaste] = usePref(ID, 'paste', false);
   const s = useThesisSession();
   return (
     <div className="th">
@@ -169,9 +181,10 @@ function Canvas() {
           </span>
         )}
         <span className="th-tabs__spacer" />
-        <button className="btn btn--primary" onClick={() => execute('/thesis')} disabled={!!s?.active}>
+        <button className="btn btn--primary" onClick={() => draftThesis()} disabled={!!s?.active}>
           Draft today’s thesis
         </button>
+        {paste && <PastePanel onClose={() => setPaste(false)} />}
       </div>
       <div className="th-body">
         {tab === 'today' && <Today goAccounts={() => setTab('accounts')} />}
@@ -227,16 +240,29 @@ function Inspector() {
   return (
     <>
       <Section title="Run">
-        <Row label="Window">
-          <span className="mono dim" style={{ fontSize: 11 }}>last 24h</span>
-        </Row>
+        {!IS_ARTIFACT && (
+          <Row label="Window">
+            <span className="mono dim" style={{ fontSize: 11 }}>last 24h</span>
+          </Row>
+        )}
         <Row label="Accounts">
           <span className="mono dim" style={{ fontSize: 11 }}>{handles ? handles.length : '—'}</span>
         </Row>
-        <Row label="TwitterAPI.io">
-          <span className={`dot ${twitter ? 'dot--ok' : 'dot--off'}`} />
-        </Row>
+        {IS_ARTIFACT ? (
+          <Row label="Posts">
+            <span className="dim" style={{ fontSize: 11 }}>pasted in</span>
+          </Row>
+        ) : (
+          <Row label="TwitterAPI.io">
+            <span className={`dot ${twitter ? 'dot--ok' : 'dot--off'}`} />
+          </Row>
+        )}
       </Section>
+      {IS_ARTIFACT ? (
+        <Section title="Schedule">
+          <div className="dim" style={{ fontSize: 10.5 }}>The daily auto-run needs OFSD running on a computer, so it isn't part of this version. Open OFSD and press Draft each morning.</div>
+        </Section>
+      ) : (
       <Section title="Schedule">
         <Row label="Daily auto-run">
           <Switch on={!!settings?.schedule.enabled} onChange={(enabled) => settings && save({ schedule: { ...settings.schedule, enabled } })} />
@@ -253,6 +279,7 @@ function Inspector() {
         </Row>
         <div className="dim" style={{ fontSize: 10.5 }}>Runs once a day while OFSD is open. It only drafts. Nothing is sent until you press Send.</div>
       </Section>
+      )}
       <Section title="Style rules">
         <textarea className="input th-style" rows={7} value={style} onChange={(e) => setStyle(e.target.value)} />
         <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
@@ -294,10 +321,14 @@ function Inspector() {
         )}
       </Section>
       <Section title="Discord">
-        <Row label="Webhook">
-          <span className={`dot ${discord ? 'dot--ok' : 'dot--off'}`} />
-        </Row>
-        <div className="dim" style={{ fontSize: 10.5 }}>{discord ? 'Connected to your private channel.' : 'Not set. Add DISCORD_WEBHOOK_URL to .env.'}</div>
+        {!IS_ARTIFACT && (
+          <Row label="Webhook">
+            <span className={`dot ${discord ? 'dot--ok' : 'dot--off'}`} />
+          </Row>
+        )}
+        <div className="dim" style={{ fontSize: 10.5 }}>
+          {IS_ARTIFACT ? 'Use Copy for Discord in the editor, then paste into your private channel.' : discord ? 'Connected to your private channel.' : 'Not set. Add DISCORD_WEBHOOK_URL to .env.'}
+        </div>
       </Section>
     </>
   );
@@ -306,14 +337,21 @@ function Inspector() {
 export const thesis: ModuleDef = {
   id: ID,
   title: 'Thesis',
-  blurb: 'Daily macro thesis from your X list · sent to private Discord',
+  blurb: IS_ARTIFACT ? 'Daily macro thesis from posts you paste · copied to Discord' : 'Daily macro thesis from your X list · sent to private Discord',
   Canvas,
   Inspector,
   commands: [
     {
       name: 'thesis',
       usage: '/thesis',
-      description: "Draft today's macro thesis from your X accounts.",
+      description: IS_ARTIFACT ? "Draft today's macro thesis from posts you paste." : "Draft today's macro thesis from your X accounts.",
+      before: () => {
+        if (!IS_ARTIFACT || hasPendingPosts()) return true;
+        setPref('tab', 'today');
+        setPref('paste', true);
+        useStore.getState().open(ID);
+        return false;
+      },
       onStarted: (runId) => {
         setPref('tab', 'today');
         useStore.getState().open(ID);
