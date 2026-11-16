@@ -2,6 +2,7 @@
 
 The UI only reads the SQLite database written by update.py, so it loads instantly.
 """
+import os
 from pathlib import Path
 
 import streamlit as st
@@ -28,6 +29,10 @@ def _detail():
 
 def _guard() -> bool:
     if components.has_data():
+        if os.environ.get("LENS_DEMO"):
+            components.md('<div class="il-meta" style="border:1px solid var(--line);border-radius:6px;padding:8px 12px;'
+                          'margin-bottom:1.2rem">DEMO DATA: SEC, 13F and FRED figures are real; prices, estimates, '
+                          'ratings, holders, options and headlines are test placeholders. Not for decisions.</div>')
         return True
     components.md('<div class="il-brand">Institutional Lens</div><h1 class="il-h1">No data yet</h1>'
                   '<p class="il-note" style="margin-top:1rem">Run the updater once to download data '
