@@ -1,0 +1,101 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #0D0F12;
+  --surface: #14171C;
+  --line: #22262D;
+  --text: #E7E9EC;
+  --muted: #8C939D;
+  --faint: #5C636D;
+  --accent: #7AA7FF;      /* the one accent: interaction only */
+  --green: #3FB27F;       /* accumulate */
+  --amber: #E0A73A;       /* hold */
+  --red: #E5534B;         /* reduce / avoid */
+}
+
+/* ── strip Streamlit chrome ── */
+#MainMenu, header[data-testid="stHeader"], footer, [data-testid="stToolbar"],
+[data-testid="stDecoration"], [data-testid="stStatusWidget"] { display: none !important; }
+html, body, [class*="css"], .stApp, .stMarkdown, button, input, textarea, select {
+  font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif !important;
+}
+.stApp { background: var(--bg); color: var(--text); }
+.block-container { max-width: 1180px; padding: 2.5rem 2rem 4rem; }
+[data-testid="stVerticalBlock"] { gap: 0.9rem; }
+a, a:visited { color: var(--accent); text-decoration: none; }
+hr { border-color: var(--line); }
+
+/* ── typography ── */
+.il-brand { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+.il-h1 { font-size: 28px; font-weight: 600; letter-spacing: -.01em; margin: 0; color: var(--text); }
+.il-h1 .name { color: var(--muted); font-weight: 400; margin-left: .5rem; font-size: 20px; }
+.il-sub { color: var(--muted); font-size: 14px; margin-top: .25rem; }
+.il-meta { color: var(--faint); font-size: 12px; }
+.il-section { margin-top: 2.6rem; padding-top: 1.4rem; border-top: 1px solid var(--line);
+  display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; }
+.il-section h2 { font-size: 18px; font-weight: 600; margin: 0; color: var(--text); }
+.il-section .q { color: var(--muted); font-size: 14px; font-weight: 400; margin-left: .6rem; }
+.il-label { color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin: 1.4rem 0 .5rem; }
+.il-note { color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+/* ── meaning colors (stance only) ── */
+.c-acc { color: var(--green) !important; }
+.c-hold { color: var(--amber) !important; }
+.c-red { color: var(--red) !important; }
+.c-muted { color: var(--muted) !important; }
+
+/* ── tables ── */
+table.il { width: 100%; border: none !important; border-collapse: collapse; margin: 0; font-size: 14px; font-variant-numeric: tabular-nums; }
+table.il th, table.il td { border: none !important; background: transparent !important; }
+table.il th { text-align: left; color: var(--faint); font-weight: 500; font-size: 12px; letter-spacing: .04em;
+  text-transform: uppercase; padding: 0 12px 8px 0; border-bottom: 1px solid var(--line) !important; }
+table.il td { padding: 9px 12px 9px 0; border-bottom: 1px solid var(--line) !important; vertical-align: top; color: var(--text); }
+table.il td.num, table.il th.num { text-align: right; }
+table.il td.src { color: var(--faint); font-size: 12px; white-space: nowrap; }
+table.il tr:last-child td { border-bottom: none !important; }
+table.il tr, table.il thead, table.il tbody { background: transparent !important; border: none !important; }
+.tip { border-bottom: 1px dotted var(--faint); cursor: help; }
+.lag { display: inline-block; font-size: 10px; letter-spacing: .06em; padding: 1px 5px; margin-left: 6px;
+  border: 1px solid var(--faint); border-radius: 3px; color: var(--muted); cursor: help; }
+.na { color: var(--faint); }
+.il-label .srcwrap { text-transform: none; letter-spacing: 0; color: var(--faint); margin-left: 10px; font-size: 12px; }
+
+/* ── verdict card ── */
+.il-card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 28px 30px; margin-top: 1.4rem; }
+.il-stance { font-size: 34px; font-weight: 600; letter-spacing: -.01em; line-height: 1; }
+.il-thesis { font-size: 16px; line-height: 1.6; color: var(--text); margin: 14px 0 0; max-width: 820px; }
+.il-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; margin-top: 26px; }
+.il-kv .k { color: var(--muted); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; }
+.il-kv .v { font-size: 20px; font-weight: 500; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.il-kv .s { color: var(--muted); font-size: 12px; margin-top: 2px; }
+.il-cols { display: grid; grid-template-columns: 1.15fr 1fr; gap: 36px; margin-top: 26px; }
+ul.il-list { margin: 0; padding-left: 1.1rem; color: var(--text); font-size: 14px; line-height: 1.7; }
+
+/* ── score strip ── */
+.il-scores { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; margin-top: 1.4rem;
+  border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.il-scores > div { padding: 14px 16px; border-right: 1px solid var(--line); }
+.il-scores > div:last-child { border-right: none; }
+.il-scores .k { color: var(--muted); font-size: 12px; }
+.il-scores .v { font-size: 22px; font-weight: 500; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.il-score { font-size: 15px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ── widgets ── */
+[data-testid="stExpander"] details { border: 1px solid var(--line) !important; border-radius: 8px; background: transparent; }
+[data-testid="stExpander"] summary { color: var(--muted); font-size: 13px; }
+[data-testid="stDataFrame"] { border: 1px solid var(--line); border-radius: 8px; }
+div[data-baseweb="select"] > div, [data-testid="stTextInput"] input { background: var(--surface) !important; border-color: var(--line) !important; }
+[data-testid="stPageLink"] a { padding: 0; }
+[data-testid="stPageLink"] p { color: var(--muted); font-size: 14px; }
+[data-testid="stPageLink-NavLink"]:hover p { color: var(--accent); }
+[data-testid="stWidgetLabel"] p { color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+
+.il-footer { margin-top: 4rem; padding-top: 1.2rem; border-top: 1px solid var(--line); color: var(--faint); font-size: 12px; line-height: 1.6; }
+
+@media (max-width: 800px) {
+  .block-container { padding: 1.5rem 1rem 3rem; }
+  .il-grid, .il-scores { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .il-cols { grid-template-columns: 1fr; }
+  table.il td.src { white-space: normal; }
+  table.il { font-size: 12.5px; }
+}

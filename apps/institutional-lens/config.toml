@@ -1,0 +1,67 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Institutional Lens: settings you can edit.
+# Lines starting with # are comments. Save the file and re-run the updater
+# (or just reopen the app for scoring changes; see note under [weights]).
+# ─────────────────────────────────────────────────────────────────────────────
+
+[keys]
+# REQUIRED by the SEC: a name and a real email address, e.g. "Jane Doe jane@example.com".
+# The SEC blocks requests without one. It is only sent to sec.gov.
+sec_user_agent = "Institutional Lens your.name@example.com"
+
+# OPTIONAL: free FRED API key (https://fred.stlouisfed.org/docs/api/api_key.html).
+# Leave empty to use FRED's public CSV download instead; both are free.
+fred_api_key = ""
+
+[weights]
+# How much each block counts toward the composite score (any positive numbers;
+# they are rescaled to sum to 1). Changes apply the next time scores are rebuilt:
+# run  run_update.bat --rescore  (takes seconds, no downloads).
+valuation    = 0.25
+fundamentals = 0.30
+ownership    = 0.20
+macro        = 0.10
+catalysts    = 0.15
+
+[stance]
+# Composite score (0-100) cut-offs.
+accumulate_at_or_above = 62
+hold_at_or_above       = 48
+reduce_at_or_above     = 40   # below this = Avoid
+# A stock needs at least this many of the 5 blocks scored, otherwise stance = n/a.
+min_blocks_scored = 3
+# Never Accumulate a stock whose Fundamentals & Revisions score is below this.
+accumulate_requires_fundamentals_at_least = 45
+# A block "agrees" with a bullish stance at or above this score, bearish at or below 100 minus it.
+agreement_band = 55
+
+[position]
+# Used for the 3-tranche build plan.
+base_weight_pct     = 2.0    # full position, % of portfolio, for a stock at the target volatility
+target_volatility   = 0.25   # annualised; higher-vol stocks get a smaller position
+min_scale           = 0.5
+max_scale           = 1.5
+weeks_between_tranches = 3
+portfolio_size_usd  = 1000000000   # used only to show "days to build" at the participation rate below
+max_adv_participation = 0.10       # never trade more than 10% of average daily dollar volume
+
+[updater]
+# Pauses between requests (seconds). Raise these if you see "rate limited" in the log.
+yahoo_pause_seconds = 0.6 
+sec_pause_seconds   = 0.15        # SEC allows max 10 requests/second
+retries             = 3
+form4_lookback_days = 120
+form4_max_filings   = 25
+openfigi_min_13f_value_usd = 1000000000   # map CUSIPs to tickers for positions at least this large
+
+[ollama]
+# Optional free local model for the one-sentence thesis. The app works without it.
+enabled = true          # tried only if Ollama is running on this PC
+url     = "http://localhost:11434"
+model   = "llama3.1:8b"
+max_per_run = 600
+
+[cik_predecessors]
+# When a company re-forms as a new legal entity (new SEC CIK), list the old CIK
+# so its financial history is kept. ExxonMobil's 2026 reorganization is built in.
+# "0002115436" = ["0000034088"]
