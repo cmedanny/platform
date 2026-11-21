@@ -1,6 +1,6 @@
 # Buy-Side Curriculum
 
-Single-file, mobile-first finance course: `index.html`. Open it in any browser; no build step, no dependencies (fonts load from Google Fonts with system fallbacks).
+Single-file, mobile-first finance course: `index.html`. Lessons mix short concept cards with hands-on activities (ledger posting, model building, statement tracing, sorting, forensic investigations and slider labs with goals). Open it in any browser; no build step, no dependencies (fonts load from Google Fonts with system fallbacks).
 
 ## Structure inside `index.html`
 

@@ -127,7 +127,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .pl-prog i.cur{background:var(--fg)}
 .pl-prog i.ok{background:var(--good)}
 .pl-prog i.no{background:var(--bad)}
-.stage{flex:1;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;padding:14px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));-webkit-overflow-scrolling:touch}
+.stage{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;touch-action:pan-y;padding:14px max(16px,env(safe-area-inset-right,0px)) 20px max(16px,env(safe-area-inset-left,0px));-webkit-overflow-scrolling:touch}
 .pl-foot{display:flex;gap:10px;padding:10px max(16px,env(safe-area-inset-right,0px)) calc(12px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));border-top:1px solid var(--line);background:var(--bg)}
 .pl-foot .btn{flex:1}
 .pl-foot .btn.ghost{flex:0 0 auto;min-width:96px}
@@ -222,7 +222,8 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;heigh
 input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:var(--line)}
 input[type=range]::-moz-range-progress{height:6px;border-radius:3px;background:var(--accent)}
 input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--fg);border:4px solid var(--accent)}
-.sel{display:grid;gap:4px;font-size:14.5px;color:var(--muted)}
+.sel{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;font-size:14.5px;color:var(--muted);min-width:0}
+.sel select{width:100%;min-width:0}
 .sel select{height:48px;border-radius:12px;border:1px solid var(--line);background:var(--surface);padding:0 12px;font-size:16px;color:var(--fg)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
 .kpi{background:var(--surface-2);border-radius:12px;padding:10px 12px;min-width:0}
@@ -263,6 +264,86 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;bac
 .sens th{color:var(--muted);font-weight:500;padding:6px 6px}
 .sens td{padding:8px 6px;border-radius:7px;text-align:right;min-width:58px}
 .sens td.base{outline:2px solid var(--accent);outline-offset:-2px}
+
+/* Activities */
+.chip.act{color:var(--accent);background:var(--accent-soft)}
+.card.k-act{border-color:var(--accent-soft)}
+.act{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+.act-b{font-size:16.5px}
+.act-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font:500 12.5px var(--f-mono);color:var(--muted)}
+.sort-item{display:grid;place-items:center;min-height:96px;padding:18px 16px;border-radius:14px;background:var(--surface-2);border:1.5px dashed var(--line);font:600 19px/1.35 var(--f-display);text-align:center;text-wrap:balance}
+.bk{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:8px}
+.bk button{min-height:54px;padding:8px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface-2);font-weight:600;font-size:15px;line-height:1.25}
+.bk button.right{border-color:var(--good);background:var(--good-soft)}
+.bk button.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.bk button.dim{opacity:.5}
+.bk button:disabled{cursor:default}
+.arows{display:grid}
+.agrp{padding:12px 0 4px}
+.arow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:6px 10px;min-height:56px;padding:5px 0;border-bottom:1px solid var(--line)}
+.arow .al{flex:1 1 120px;min-width:0;font-size:15.5px;line-height:1.3}
+.arow.tot .al{font-weight:600}
+.arow .gv{font:500 16px var(--f-mono);font-variant-numeric:tabular-nums;padding-right:12px}
+.ahint{flex-basis:100%;font-size:13.5px;line-height:1.45;color:var(--bad)}
+.sin{display:inline-flex;align-items:center;flex:none;height:46px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface-2);overflow:hidden}
+.sin .sg{width:42px;height:100%;border:0;border-right:1px solid var(--line);background:transparent;font:600 19px var(--f-mono);color:var(--muted)}
+.sin .sg.neg{color:var(--bad)}
+.sin input{width:86px;height:100%;border:0;background:transparent;padding:0 10px;font:500 16.5px var(--f-mono);text-align:right;outline:none;color:var(--fg)}
+.sin .u{padding-right:10px;color:var(--muted);font:12px var(--f-mono)}
+.sin:focus-within{border-color:var(--accent)}
+.arow.ok .sin,.lrow.ok .sin,.arow.ok .seg3{border-color:var(--good);background:var(--good-soft)}
+.arow.no .sin,.lrow.no .sin,.arow.no .seg3{border-color:var(--bad);background:var(--bad-soft)}
+.arow.shown .al::after{content:" · shown";color:var(--muted);font-size:12px;font-family:var(--f-mono)}
+.seg3{display:inline-flex;flex:none;border:1.5px solid var(--line);border-radius:11px;overflow:hidden}
+.seg3 button{width:48px;height:44px;border:0;background:var(--surface-2);font:600 17px var(--f-mono);color:var(--muted)}
+.seg3 button+button{border-left:1px solid var(--line)}
+.seg3 button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.gtab{overflow-x:auto;border-radius:12px;background:var(--surface-2);padding:6px 10px}
+.gtab table{border-collapse:collapse;width:100%;font-size:14.5px}
+.gtab th,.gtab td{padding:7px 6px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+.gtab thead th{font:500 12px var(--f-mono);color:var(--muted);letter-spacing:.04em}
+.gtab th[scope="row"],.gtab thead th:first-child{text-align:left;font-weight:500;font-family:var(--f-body)}
+.gtab td{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.gtab tr:last-child>*{border-bottom:0}
+.given-kv{background:var(--surface-2);border-radius:12px;padding:0 12px;border-top:0}
+.given-kv>div:last-child{font-weight:400;border-bottom:0}
+.hunt{display:grid;gap:6px}
+.hrow{display:grid;grid-template-columns:minmax(0,1.7fr) repeat(var(--n),minmax(0,1fr));gap:6px;align-items:center;width:100%;min-height:50px;padding:8px 10px;border-radius:11px;border:1.5px solid var(--line);background:var(--surface-2);text-align:left;font-size:14.5px;line-height:1.3}
+.hrow .v{font:500 13.5px var(--f-mono);font-variant-numeric:tabular-nums;text-align:right}
+.hrow.hhead{min-height:0;padding:0 10px;border:0;background:none;color:var(--muted)}
+.hrow.hhead .v{font-size:12px}
+.hrow.sel{border-color:var(--accent);background:var(--accent-soft)}
+.hrow.found{border-color:var(--good);background:var(--good-soft)}
+.hrow.miss{border-color:var(--accent);border-style:dashed}
+.hrow.fa{border-color:var(--bad);background:var(--bad-soft)}
+.hrow:disabled{cursor:default;opacity:1}
+.hwhy{font-size:13.5px;line-height:1.5;color:var(--muted);padding:0 10px 6px}
+.hwhy b{color:var(--fg);font-weight:600}
+.tx{padding:14px 16px;border-radius:12px;background:var(--surface-2);font-size:17px;font-weight:500;line-height:1.45}
+.lrows{display:grid}
+.lrow{display:flex;align-items:center;gap:10px;min-height:56px;border-bottom:1px solid var(--line)}
+.lrow .an{flex:1;min-width:0;font-size:15.5px;line-height:1.25}
+.lrow .an small{display:block;font:12px var(--f-mono);color:var(--muted);margin-top:2px}
+.balbar{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;border-radius:11px;background:var(--surface-2);font:500 13px var(--f-mono)}
+.balbar svg{width:16px;height:16px;vertical-align:-3px}
+.balbar.ok{background:var(--good-soft);color:var(--good)}
+.balbar.no{background:var(--bad-soft)}
+.balbar b{color:var(--fg)}
+.tasks{display:grid;gap:8px;list-style:none;margin:0;padding:0}
+.tasks li{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--surface-2);font-size:15px;line-height:1.4}
+.tasks .ti{flex:none;width:24px;height:24px;margin-top:1px;border-radius:50%;border:1.5px solid var(--faint);display:grid;place-items:center;color:transparent}
+.tasks .ti svg{width:15px;height:15px}
+.tasks li.done{background:var(--good-soft)}
+.tasks li.done .ti{background:var(--good);border-color:var(--good);color:var(--bg)}
+.hint-btn{border:0;background:none;padding:0;min-height:36px;color:var(--accent);font-size:14px;font-weight:500}
+.thint{font-size:13.5px;color:var(--muted);padding-bottom:4px}
+.lab-tool{border-top:1px solid var(--line);padding-top:12px}
+.flags{display:grid;gap:6px;background:var(--surface-2);border-radius:14px;padding:12px}
+.flag{display:flex;gap:10px;align-items:flex-start;font-size:14px;line-height:1.4}
+.flag .fd{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:var(--good)}
+.flag.on .fd{background:var(--bad)}
+.flag strong{font-weight:600}
+.flag:not(.on) strong{color:var(--muted);font-weight:500}
 
 /* Glossary */
 .search{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:8px}
@@ -329,11 +410,19 @@ textarea{width:100%;min-height:96px;border-radius:12px;border:1px solid var(--li
 
    Module shape:
    { id, num, title, blurb, outline:[lesson titles],          // placeholders
-     lessons:[{ id, title, minutes, goals:[], sources:'', cards:[] }],
+     lessons:[{ id, title, minutes, lab?, goals:[], sources:'', cards:[] }],
      quiz:[question], formulas:[{n, f, v:[[symbol, definition]], note}],
      glossary:[[term, definition]] }
 
    Card types (t): concept | example | mistake | case | check | tool
+                   + hands-on activities: ledger | build | arrows | sort | hunt | lab
+     ledger: { id, h, b, unit, accounts:[[name,'A'|'L'|'E']], tx:[{ x, e:{account: change}, why, hint? }] }
+     build:  { id, h, b, given?:{cols?, rows}, rows:[{ l, v (given) | a (answer), unit?, tol?, tot?, hint? }], why }
+     arrows: { id, h, b, mode:'amt'|'dir', groups:[{ g, rows:[[label, answer]] }], why }
+     sort:   { id, h, b, buckets:[...], items:[{ x, a (bucket index), why }] }
+     hunt:   { id, h, b, cols:[...], need, rows:[{ l, v:[...], flag?, why }], debrief }
+     lab:    { id, h, b, tool: TOOL_ID, init?, tasks:[{ x, hint, test: state => bool }], debrief }
+     Activity ids must be unique and stable (progress is keyed on them).
      concept/mistake/case: { h, b, f?, note? }
      example: { h, b?, rows?:[[label, value]], f? }
      check:   { q: question }
@@ -353,7 +442,7 @@ COURSE.modules.push({
   lessons: [
 
   /* ---------- 1.1 ---------- */
-  { id: 'm1-l1', title: 'The Accounting Equation', minutes: 4,
+  { id: 'm1-l1', title: 'The Accounting Equation', minutes: 6,
     goals: ['Why every transaction hits two accounts', 'What shareholders’ equity actually represents', 'The retained-earnings bridge between statements'],
     sources: 'CFA Institute, CFA Program Curriculum Level I, Financial Statement Analysis (“Financial Reporting Mechanics”, “Analyzing Balance Sheets”); Berk & DeMarzo, Corporate Finance (“Introduction to Financial Statement Analysis”).',
     cards: [
@@ -362,20 +451,37 @@ COURSE.modules.push({
         b: `**Assets** are resources the firm controls that should produce future benefits. **Liabilities** are obligations to outsiders. **Equity** is the residual claim: what is left for shareholders after every creditor is paid. Because the identity always holds, every transaction changes at least two accounts. On a desk that is a sanity check: if cash moved, something else moved too.` },
       { t: 'concept', h: 'Double entry in 30 seconds',
         b: `Every transaction is recorded with equal debits and credits. **Debits** increase assets and expenses. **Credits** increase liabilities, equity and revenue. You won’t post journal entries at a fund, but thinking in pairs is how you debug a model. When the balance sheet is off by $12.4m, look for the transaction where only one side was booked.` },
-      { t: 'example', h: 'Five transactions, one balance sheet',
-        rows: [['Raise $100 of equity', 'Cash +100 · Equity +100'], ['Borrow $50', 'Cash +50 · Debt +50'], ['Buy $60 of equipment for cash', 'Cash −60 · PP&E +60'], ['Buy $20 of inventory on credit', 'Inventory +20 · Payables +20'], ['Ending position', 'Assets 170 = Liab. 70 + Equity 100']],
-        b: `Cash ends at 90, PP&E at 60, inventory at 20. Every row keeps both sides equal.` },
-      { t: 'check', q: { id: 'm1-l1-q1', kind: 'mc',
-        q: 'A company buys $30 of inventory on credit from a supplier. What happens to its balance sheet?',
-        opts: ['Assets +30, liabilities +30', 'Assets +30, equity +30', 'Cash −30, inventory +30', 'No change until the invoice is paid'], a: 0,
-        why: `Inventory (an asset) and accounts payable (a liability) both rise by $30. Cash doesn’t move until the supplier is paid, and there is no expense yet because nothing has been sold.` } },
+      { t: 'ledger', id: 'm1-l1-a1', h: 'Book the first week',
+        b: 'You keep the books for a new coffee roaster. Post each transaction: enter the change in every account it touches (tap ± for decreases). Sales and costs go straight to retained earnings here.',
+        unit: '$',
+        accounts: [['Cash', 'A'], ['Inventory', 'A'], ['Equipment', 'A'], ['Payables', 'L'], ['Deferred revenue', 'L'], ['Debt', 'L'], ['Share capital', 'E'], ['Retained earnings', 'E']],
+        tx: [
+          { x: 'Founders invest $100 in exchange for shares.', e: { 'Cash': 100, 'Share capital': 100 }, why: 'Cash comes in and the owners’ contributed capital rises by the same amount.' },
+          { x: 'The company borrows $50 from a bank.', e: { 'Cash': 50, 'Debt': 50 }, why: 'An asset and a liability rise together. Equity is untouched: borrowing isn’t income.' },
+          { x: 'It buys a $60 roaster, paying cash.', e: { 'Cash': -60, 'Equipment': 60 }, why: 'One asset swaps for another. Total assets don’t change.' },
+          { x: 'It buys $20 of green coffee on credit.', e: { 'Inventory': 20, 'Payables': 20 }, why: 'Inventory and payables both rise. No expense yet, because nothing has been sold.' },
+          { x: 'It sells coffee that cost $8 for $15 cash.', e: { 'Cash': 15, 'Inventory': -8, 'Retained earnings': 7 }, hint: 'Three accounts move: the cash received, the inventory that left, and the profit.', why: 'Revenue $15 − COGS $8 = $7 of profit, which lands in retained earnings. Inventory falls by its cost, not its selling price.' },
+          { x: 'A café prepays $12 for next month’s deliveries.', e: { 'Cash': 12, 'Deferred revenue': 12 }, why: 'Cash received before delivery is a liability. No revenue until the coffee ships.' },
+          { x: 'It pays $10 of the supplier bill.', e: { 'Cash': -10, 'Payables': -10 }, why: 'Settling a liability shrinks both sides. No expense: the cost was recorded when the coffee was sold.' }
+        ] },
       { t: 'concept', h: 'Equity is a tally, not a pile of cash',
         b: `Shareholders’ equity = contributed capital (common stock + additional paid-in capital) + retained earnings − treasury stock ± accumulated other comprehensive income. **Retained earnings** is cumulative net income minus cumulative dividends. It is not cash. A firm can show $5bn of retained earnings and $200m of cash because the profits went into plants, inventory or acquisitions.` },
+      { t: 'sort', id: 'm1-l1-a2', h: 'Asset, liability or equity?',
+        b: 'Tap where each item belongs on the balance sheet.',
+        buckets: ['Asset', 'Liability', 'Equity'],
+        items: [
+          { x: 'Inventory', a: 0, why: 'Goods held for sale: a resource expected to turn into cash.' },
+          { x: 'Deferred revenue', a: 1, why: 'Cash received for goods or services still owed to the customer: an obligation.' },
+          { x: 'Retained earnings', a: 2, why: 'Cumulative profits kept in the business: part of shareholders’ equity.' },
+          { x: 'Prepaid insurance', a: 0, why: 'Coverage paid for but not yet used: a future benefit.' },
+          { x: 'Accrued wages', a: 1, why: 'Wages staff have earned but not yet been paid: an obligation.' },
+          { x: 'Treasury stock', a: 2, why: 'Repurchased shares are contra-equity. They reduce equity; they are not an asset.' },
+          { x: 'Goodwill', a: 0, why: 'An intangible asset from acquisitions: the premium over identifiable net assets.' },
+          { x: 'Operating lease liability', a: 1, why: 'Since ASC 842 / IFRS 16, the obligation to make lease payments sits on the balance sheet.' },
+          { x: 'Additional paid-in capital', a: 2, why: 'What shareholders paid above par value: contributed capital.' }
+        ] },
       { t: 'mistake', h: 'Treating book value as market value',
         b: `Book equity reflects historical cost and accounting rules. Market cap reflects expected future cash flows. A software firm with $2bn of book equity can be worth $40bn because its main assets (code, customer relationships, brand) were mostly expensed, never capitalized. Price-to-book is most useful for banks and insurers, whose assets are largely financial and carried near fair value.` },
-      { t: 'check', q: { id: 'm1-l1-q2', kind: 'num',
-        q: 'Total assets are $840m and total liabilities are $510m. What is book equity?', a: 330, unit: '$m',
-        why: `Equity = Assets − Liabilities = 840 − 510 = $330m.` } },
       { t: 'concept', h: 'The retained-earnings roll-forward',
         f: 'RE<sub>end</sub> = RE<sub>begin</sub> + NI − Dividends',
         b: `This line is the bridge between the income statement and the balance sheet, and modelers check it every period. If it doesn’t roll, something hit equity directly (an accounting-standard transition adjustment, for example) or a dividend is missing. Buybacks usually sit in treasury stock, although companies that retire repurchased shares may charge part of the cost to retained earnings.` },
@@ -389,31 +495,47 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.2 ---------- */
-  { id: 'm1-l2', title: 'The Income Statement', minutes: 6,
+  { id: 'm1-l2', title: 'The Income Statement', minutes: 7,
     goals: ['Read a P&L from revenue to diluted EPS', 'How revenue recognition (ASC 606 / IFRS 15) works', 'Why EBITDA is useful and dangerous'],
     sources: 'CFA Program Curriculum Level I (“Analyzing Income Statements”); FASB ASC 606 and IFRS 15, Revenue from Contracts with Customers; SEC Regulation G and Regulation S-K Item 10(e) on non-GAAP financial measures.',
     cards: [
       { t: 'concept', h: 'From the top line to EPS',
         b: `Revenue − cost of goods sold = **gross profit**. Minus operating expenses (SG&A, R&D) = **operating income**, usually treated as EBIT. Minus interest = **pre-tax income**. Minus taxes = **net income**. Divide by diluted shares for **diluted EPS**. The income statement covers a period, such as a quarter or a year. The balance sheet is a snapshot at one date.`,
         note: 'EBIT and operating income are often used interchangeably, but definitions differ on non-operating items. Check what a given EBIT includes.' },
-      { t: 'example', h: 'Read a P&L the way a desk does',
-        rows: [['Revenue', '1,000'], ['Cost of goods sold', '(600)'], ['Gross profit · 40.0% margin', '400'], ['SG&A', '(150)'], ['R&D', '(50)'], ['EBIT · 20.0% margin', '200'], ['Interest expense', '(20)'], ['Pre-tax income', '180'], ['Taxes at 25%', '(45)'], ['Net income · 13.5% margin', '135'], ['Diluted EPS on 50m shares', '$2.70']],
-        b: `$m except per share. Margins, not levels, get compared across peers and quarters.` },
-      { t: 'check', q: { id: 'm1-l2-q1', kind: 'num',
-        q: 'Revenue $500m, COGS $320m, SG&A $80m. What is the operating margin?', a: 20, unit: '%',
-        why: `Operating income = 500 − 320 − 80 = $100m. Operating margin = 100 / 500 = 20%.` } },
+      { t: 'build', id: 'm1-l2-a1', h: 'Build the P&L',
+        b: 'Fill in every blank from the raw data. Enter costs as negatives (tap ±). $m except per share.',
+        given: { rows: [['Revenue', '1,000'], ['Cost of goods sold', '600'], ['SG&A', '150'], ['R&D', '50'], ['Interest expense', '20'], ['Tax rate', '25%'], ['Diluted shares', '50m']] },
+        rows: [
+          { l: 'Revenue', v: '1,000' },
+          { l: 'Cost of goods sold', a: -600, hint: 'Costs are entered as negatives.' },
+          { l: 'Gross profit', a: 400, tot: true, hint: 'Revenue − COGS.' },
+          { l: 'Gross margin', a: 40, unit: '%', hint: 'Gross profit ÷ revenue.' },
+          { l: 'SG&A + R&D', a: -200, hint: '150 + 50, entered as a cost.' },
+          { l: 'EBIT', a: 200, tot: true, hint: 'Gross profit − operating expenses.' },
+          { l: 'Interest expense', a: -20 },
+          { l: 'Pre-tax income', a: 180, tot: true },
+          { l: 'Taxes at 25%', a: -45, hint: '25% of pre-tax income.' },
+          { l: 'Net income', a: 135, tot: true },
+          { l: 'Diluted EPS', a: 2.7, unit: '$', tol: 0.006, hint: 'Net income ÷ 50m diluted shares.' }
+        ],
+        why: 'Margins (40% gross, 20% EBIT, 13.5% net), not dollar levels, are what get compared across peers and quarters.' },
       { t: 'concept', h: 'Revenue recognition in five steps',
         b: `Under ASC 606 / IFRS 15, revenue is recognized when control of a good or service passes to the customer, not when cash arrives. The steps: (1) identify the contract, (2) identify the performance obligations, (3) determine the transaction price, (4) allocate it to the obligations, (5) recognize revenue as each obligation is satisfied. US public companies adopted it for fiscal years beginning after Dec 15, 2017.` },
       { t: 'check', q: { id: 'm1-l2-q2', kind: 'order',
         q: 'Put the ASC 606 five-step model in order.',
         opts: ['Identify the contract', 'Identify performance obligations', 'Determine the transaction price', 'Allocate the price to obligations', 'Recognize revenue as obligations are satisfied'],
         why: `Contract → obligations → price → allocation → recognition. Most of the judgment sits in steps 2 and 4: what counts as a separate obligation, and how the price is split between them.` } },
-      { t: 'example', h: 'An annual SaaS contract',
-        b: `A customer signs a 12-month, $120,000 subscription on Jan 1 and pays upfront. Q1 cash received: $120,000. Q1 revenue: $30,000 (3 of 12 months). The other $90,000 sits on the balance sheet as **deferred revenue**, a liability, and is recognized at $10,000 a month. Strong bookings show up in cash and deferred revenue before they show up in revenue.` },
-      { t: 'check', q: { id: 'm1-l2-q3', kind: 'mc',
-        q: 'Same contract. What is deferred revenue on March 31?',
-        opts: ['$90,000', '$120,000', '$30,000', '$0'], a: 0,
-        why: `Three months of service have been delivered, so $30,000 is recognized. The remaining $90,000 is service still owed to the customer, so it stays a liability.` } },
+      { t: 'build', id: 'm1-l2-a2', h: 'Run a deferred revenue schedule',
+        b: 'A customer signs a 12-month, $120,000 subscription on Jan 1 and pays the full amount upfront. Revenue is recognized evenly as the service is delivered. Fill in the schedule in $000s.',
+        rows: [
+          { l: 'Q1 cash received', a: 120 },
+          { l: 'Q1 revenue recognized', a: 30, hint: '3 of 12 months delivered.' },
+          { l: 'Deferred revenue, Mar 31', a: 90, hint: 'Cash received − revenue recognized so far.' },
+          { l: 'Q2 cash received', a: 0, hint: 'The customer already paid for the year.' },
+          { l: 'Q2 revenue recognized', a: 30 },
+          { l: 'Deferred revenue, Jun 30', a: 60, tot: true }
+        ],
+        why: 'Revenue is smooth while cash is lumpy. A company signing many upfront annual contracts shows cash and deferred revenue growing before revenue does. That is why SaaS investors track billings (revenue + change in deferred revenue).' },
       { t: 'concept', h: 'EBITDA', f: 'EBITDA = EBIT + D&amp;A',
         b: `EBITDA is the market’s favorite proxy for operating cash generation and the base for EV/EBITDA multiples and leverage covenants (debt/EBITDA). It is **non-GAAP**: SEC rules (Regulation G, Reg S-K Item 10(e)) require companies that present it to reconcile it to the most comparable GAAP measure. It ignores capex, working capital and taxes, so it flatters capital-intensive businesses.` },
       { t: 'mistake', h: 'Taking “adjusted” numbers at face value',
@@ -433,7 +555,7 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.3 ---------- */
-  { id: 'm1-l3', title: 'The Balance Sheet', minutes: 6,
+  { id: 'm1-l3', title: 'The Balance Sheet', minutes: 7,
     goals: ['How assets and liabilities are measured', 'Net debt, leases and goodwill', 'LIFO vs FIFO and the LIFO reserve'],
     sources: 'CFA Program Curriculum Level I (“Analyzing Balance Sheets”, “Analysis of Inventories”, “Analysis of Long-Term Assets”); FASB ASC 350 (goodwill), ASC 842 and IFRS 16 (leases), IAS 38 (intangibles); Koller, Goedhart & Wessels, Valuation (McKinsey & Company).',
     cards: [
@@ -445,9 +567,19 @@ COURSE.modules.push({
         q: 'A US pharma company spent $8bn on internal R&D over a decade and built a valuable drug pipeline. Where is most of that pipeline on its balance sheet?',
         opts: ['Mostly absent: internal R&D is expensed as incurred', 'In intangible assets at fair value', 'In goodwill', 'In PP&E at historical cost'], a: 0,
         why: `Under US GAAP, internal R&D is expensed as incurred, so the pipeline is mostly off the balance sheet. IFRS (IAS 38) lets companies capitalize development costs once strict criteria are met, but research is always expensed. Buy the same pipeline in a business combination and it does appear, as an acquired intangible.` } },
-      { t: 'example', h: 'Net debt, two ways',
-        rows: [['Cash', '300'], ['Short-term debt', '100'], ['Long-term debt', '900'], ['Operating lease liabilities', '150'], ['Net debt excluding leases', '100 + 900 − 300 = 700'], ['Net debt including leases', '700 + 150 = 850']],
-        b: `$m. Which one you use depends on how your EBITDA treats rent. See the next card.` },
+      { t: 'sort', id: 'm1-l3-a1', h: 'Operating or financing?',
+        b: 'Analysts split the balance sheet into operating items (used to run the business) and financing items (how it is funded). The split drives invested capital and enterprise value.',
+        buckets: ['Operating', 'Financing'],
+        items: [
+          { x: 'Accounts receivable', a: 0, why: 'Created by selling to customers: part of operating working capital.' },
+          { x: 'Revolving credit facility (drawn)', a: 1, why: 'Borrowed money: debt.' },
+          { x: 'Inventory', a: 0, why: 'Needed to run the business.' },
+          { x: 'Senior notes due 2031', a: 1, why: 'Debt: a financing claim on the firm.' },
+          { x: 'Deferred revenue', a: 0, why: 'An operating liability: customers fund the business by paying early. It reduces operating working capital.' },
+          { x: 'Excess cash', a: 1, why: 'Cash beyond operating needs is netted against debt (net debt) instead of treated as an operating asset.' },
+          { x: 'Accrued wages', a: 0, why: 'An operating liability created by running the business.' },
+          { x: 'Preferred stock', a: 1, why: 'A financing claim that sits between debt and common equity in the EV bridge.' }
+        ] },
       { t: 'mistake', h: 'Counting leases twice, or not at all',
         b: `Since 2019, ASC 842 and IFRS 16 put most leases on the balance sheet. Under IFRS 16, lease cost becomes depreciation plus interest, so EBITDA goes up. Under US GAAP, operating-lease cost stays in operating expense. If you add lease liabilities to EV, pair them with EBITDA before rent (EBITDAR), or you penalize the company twice. Comparing IFRS and US GAAP peers without adjusting distorts EV/EBITDA.` },
       { t: 'check', q: { id: 'm1-l3-q2', kind: 'num',
@@ -455,11 +587,17 @@ COURSE.modules.push({
         why: `Net debt = total debt − cash = (50 + 600) − 250 = $400m.` } },
       { t: 'concept', h: 'Goodwill', f: 'Goodwill = Price paid − FV of identifiable net assets',
         b: `When an acquirer pays more than the fair value of the target’s identifiable net assets, the excess is goodwill. US GAAP (for public companies) and IFRS don’t amortize it; they test it for impairment at least annually. An impairment is non-cash, but it admits the deal destroyed value. It often arrives years after the market priced in the damage.` },
-      { t: 'example', h: 'Goodwill from a deal',
-        b: `A buyer pays $1,000m for a target whose identifiable assets have a fair value of $900m, with $300m of liabilities. Net identifiable assets = $600m, so goodwill = **$400m**. A later $150m impairment cuts pre-tax income by $150m (often with no tax benefit) and reduces equity. Cash is untouched, so the charge is added back in CFO.` },
-      { t: 'check', q: { id: 'm1-l3-q3', kind: 'num',
-        q: 'Purchase price $2.5bn. Fair value of identifiable assets $3.1bn; liabilities assumed $1.4bn. What is goodwill?', a: 0.8, tol: 0.001, unit: '$bn',
-        why: `Net identifiable assets = 3.1 − 1.4 = $1.7bn. Goodwill = 2.5 − 1.7 = $0.8bn.` } },
+      { t: 'build', id: 'm1-l3-a2', h: 'Allocate the purchase price',
+        b: 'A buyer pays $1,000m for a target. Fair values at closing: receivables $100m, inventory $150m, PP&E $500m, identified intangibles (customer lists, brands) $150m. Liabilities assumed: $300m. $m.',
+        rows: [
+          { l: 'Fair value of identifiable assets', a: 900 },
+          { l: 'Liabilities assumed', a: -300 },
+          { l: 'Net identifiable assets', a: 600, tot: true },
+          { l: 'Goodwill', a: 400, tot: true, hint: 'Price paid − net identifiable assets.' },
+          { l: 'Later $150m impairment: change in pre-tax income', a: -150 },
+          { l: 'Same impairment: change in cash', a: 0, hint: 'Impairments are non-cash.' }
+        ],
+        why: 'Goodwill is the residual. Finite-lived identified intangibles are amortized while goodwill is only tested for impairment, so how the price is split changes future earnings.' },
       { t: 'concept', h: 'Inventory: FIFO vs LIFO',
         b: `When prices rise, **LIFO** (last in, first out) charges the newest, highest costs to COGS: lower profit, lower taxes, and an inventory balance stuck at old prices. **FIFO** does the opposite. LIFO is allowed under US GAAP but not IFRS. US LIFO users disclose the **LIFO reserve** (FIFO inventory − LIFO inventory) so analysts can restate them to FIFO.` },
       { t: 'check', q: { id: 'm1-l3-q4', kind: 'mc',
@@ -469,13 +607,20 @@ COURSE.modules.push({
       { t: 'concept', h: 'Restating LIFO to FIFO',
         f: 'Inv<sub>FIFO</sub> = Inv<sub>LIFO</sub> + LIFO reserve<br>COGS<sub>FIFO</sub> = COGS<sub>LIFO</sub> − ΔLIFO reserve',
         b: `This is the standard CFA adjustment. On a FIFO basis, equity rises by the LIFO reserve × (1 − t), because the extra cumulative profit would have been taxed. The remaining reserve × t goes to a deferred tax liability (or lower cash, if you assume the taxes were paid).` },
-      { t: 'check', q: { id: 'm1-l3-q5', kind: 'num',
-        q: 'LIFO COGS is $2,000m. The LIFO reserve rose from $100m to $120m during the year. What is COGS on a FIFO basis?', a: 1980, unit: '$m',
-        why: `COGS_FIFO = 2,000 − (120 − 100) = $1,980m. A rising LIFO reserve means LIFO charged more cost to COGS than FIFO would have.` } }
+      { t: 'build', id: 'm1-l3-a3', h: 'Restate a LIFO company to FIFO',
+        b: 'A US company reports LIFO inventory of $400m and LIFO COGS of $2,000m. Its LIFO reserve rose from $100m to $120m during the year. Tax rate 25%. $m.',
+        rows: [
+          { l: 'FIFO inventory', a: 520, hint: 'LIFO inventory + ending LIFO reserve.' },
+          { l: 'Change in LIFO reserve', a: 20 },
+          { l: 'FIFO COGS', a: 1980, hint: 'LIFO COGS − the increase in the reserve.' },
+          { l: 'Change in pre-tax income vs LIFO', a: 20 },
+          { l: 'Cumulative increase in equity', a: 90, tot: true, hint: 'Ending reserve × (1 − tax rate).' }
+        ],
+        why: 'FIFO-basis numbers make a LIFO company comparable with FIFO and IFRS peers. The other $30m (reserve × tax rate) would go to a deferred tax liability.' }
     ] },
 
   /* ---------- 1.4 ---------- */
-  { id: 'm1-l4', title: 'Accrual Accounting', minutes: 5,
+  { id: 'm1-l4', title: 'Accrual Accounting', minutes: 6,
     goals: ['Why accrual profit and cash diverge', 'The four types of accrual', 'Where judgment, and manipulation, enters'],
     sources: 'CFA Program Curriculum Level I (“Financial Reporting Mechanics”, “Analyzing Income Statements”); FASB ASC 340-40 (contract costs) and ASC 326 (current expected credit losses); SEC v. Albert J. Dunlap et al. (Sunbeam), complaint filed May 2001.',
     cards: [
@@ -483,22 +628,32 @@ COURSE.modules.push({
         b: `Under accrual accounting, revenue is recorded when earned and expenses when incurred, whatever the timing of cash. That is how a profitable company can run out of money, and how a loss-making one can pile up cash. The income statement measures economic performance. The cash flow statement tells you whether that performance turned into money.` },
       { t: 'concept', h: 'The four accruals',
         b: `Every timing gap is one of four types:\n**Accrued revenue**: earned, not yet received → receivable (asset).\n**Deferred revenue**: received, not yet earned → liability.\n**Accrued expense**: incurred, not yet paid → liability.\n**Prepaid expense**: paid, not yet incurred → asset.\nEach reverses later, when the cash or the earning catches up.` },
+      { t: 'sort', id: 'm1-l4-a1', h: 'Which accrual is it?',
+        b: 'Classify each item from the point of view of the company keeping the books.',
+        buckets: ['Accrued revenue', 'Deferred revenue', 'Accrued expense', 'Prepaid expense'],
+        items: [
+          { x: 'A consultancy finishes December work it will bill in January', a: 0, why: 'Earned in December, not yet received: a receivable.' },
+          { x: 'An airline sells tickets for flights next month', a: 1, why: 'Cash in, service not yet delivered: a liability until the flights operate.' },
+          { x: 'December’s electricity bill arrives in January', a: 2, why: 'The cost was incurred in December, so it is accrued then, unpaid.' },
+          { x: 'A retailer pays six months’ rent in advance', a: 3, why: 'Paid now for future periods: an asset expensed month by month.' },
+          { x: 'Bond interest has built up since the last coupon date', a: 2, why: 'Interest cost incurred but not yet paid: an accrued liability.' },
+          { x: 'A gym collects annual memberships upfront', a: 1, why: 'The gym owes a year of access: deferred revenue.' },
+          { x: 'A company pays a 12-month software licence in January', a: 3, why: 'An advance payment for future use.' },
+          { x: 'A drug company earns royalties its partner will report and pay next quarter', a: 0, why: 'Earned now, collected later: accrued revenue.' }
+        ] },
       { t: 'check', q: { id: 'm1-l4-q1', kind: 'mc',
         q: 'On July 1 a company prepays 12 months of insurance for $24,000. What prepaid asset is on its September 30 balance sheet?',
         opts: ['$18,000', '$24,000', '$6,000', '$0'], a: 0,
         why: `Three months ($6,000) have been used and expensed. Nine months of coverage remain, so the prepaid asset is $18,000.` } },
-      { t: 'check', q: { id: 'm1-l4-q2', kind: 'mc',
-        q: 'December wages of $40,000 are paid on January 5. What goes into December’s accounts?',
-        opts: ['Wage expense of $40,000 and an accrued liability of $40,000', 'No entry until the cash is paid', 'A prepaid asset of $40,000', 'A $40,000 reduction in cash'], a: 0,
-        why: `The expense was incurred in December, so it is recorded then, along with an accrued liability. In January the payment reduces cash and clears the liability, with no new expense.` } },
       { t: 'concept', h: 'The matching principle',
         b: `Costs are matched to the revenue they help produce. A $100m machine used for 10 years is depreciated, not expensed on day one. Sales commissions on a three-year contract can be capitalized and amortized over the contract (ASC 340-40). Matching makes margins comparable across periods. Every capitalization decision is also a judgment that management can stretch.` },
-      { t: 'example', h: 'Same machine, two depreciation methods',
-        f: 'Straight-line = (Cost − Salvage) / Useful life',
-        b: `Cost $100m, 10-year life, $10m salvage value.\n**Straight-line:** (100 − 10) / 10 = $9m a year.\n**Double-declining balance, year 1:** 2/10 × $100m = $20m (salvage only limits the later years).\nSame asset, same cash, yet year-1 pre-tax profit differs by $11m purely from the method chosen.` },
-      { t: 'check', q: { id: 'm1-l4-q3', kind: 'num',
-        q: 'An asset costs $50m, has a $5m salvage value and a 9-year useful life. What is straight-line annual depreciation?', a: 5, unit: '$m',
-        why: `(50 − 5) / 9 = $5m a year.` } },
+      { t: 'lab', id: 'm1-l4-a2', tool: 'depreciation', h: 'Depreciation lab',
+        b: 'Same machine, different accounting choices. Complete both tasks with the sliders.',
+        tasks: [
+          { x: 'With cost $100m and salvage $10m, find the useful life that makes straight-line depreciation exactly $6m a year.', hint: '(100 − 10) ÷ life = 6.', test: s => s.cost === 100 && s.salvage === 10 && Math.abs(s.sl1 - 6) < 1e-9 },
+          { x: 'Make year-1 double-declining depreciation exceed straight-line by more than $20m.', hint: 'Shorter lives widen the gap. Try 5 years.', test: s => s.ddb1 - s.sl1 > 20 }
+        ],
+        debrief: 'Over the whole life both methods expense the same total (cost − salvage); they only shift profit between years. A longer life shrinks every year’s charge. Both choices sit in the notes, not the headline numbers.' },
       { t: 'mistake', h: 'Missing a change in useful life',
         b: `Lengthening asset lives cuts annual depreciation and lifts EPS with no change in the business. It can be justified, but it is disclosed in the notes, not the headline. Microsoft and Alphabet extended the useful lives of their servers to six years in 2022 and 2023, and both disclosed the expected effect on results. When margins jump, read the depreciation policy note first.` },
       { t: 'concept', h: 'Estimates inside accruals',
@@ -512,29 +667,48 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.5 ---------- */
-  { id: 'm1-l5', title: 'The Cash Flow Statement', minutes: 5,
+  { id: 'm1-l5', title: 'The Cash Flow Statement', minutes: 6,
     goals: ['The three sections and what goes where', 'Building CFO with the indirect method', 'How capitalizing costs inflates operating cash flow'],
     sources: 'CFA Program Curriculum Level I (“Analyzing Statements of Cash Flows I & II”); FASB ASC 230; IASB IAS 7 and IFRS 18 (issued April 2024); SEC v. WorldCom, Inc., complaint filed June 26, 2002.',
     cards: [
       { t: 'concept', h: 'Three sections',
         b: `**Operating (CFO):** cash from running the business. **Investing (CFI):** capex, acquisitions, buying and selling securities. **Financing (CFF):** debt raised or repaid, shares issued or repurchased, dividends paid. The three sum to the change in cash. Cash flow is harder to manipulate than earnings, though not impossible, which is why skeptical analysts start here.` },
+      { t: 'sort', id: 'm1-l5-a1', h: 'Operating, investing or financing?',
+        b: 'Classify each cash flow under US GAAP.',
+        buckets: ['Operating', 'Investing', 'Financing'],
+        items: [
+          { x: 'Cash collected from customers', a: 0, why: 'Core operations.' },
+          { x: 'Capital expenditures', a: 1, why: 'Buying long-lived assets is investing.' },
+          { x: 'Dividends paid', a: 2, why: 'A return to shareholders: financing.' },
+          { x: 'Interest paid on bonds', a: 0, why: 'Under US GAAP interest paid is operating, even though the debt itself is financing.' },
+          { x: 'Share buyback', a: 2, why: 'Returning capital to shareholders.' },
+          { x: 'Cash paid to acquire a competitor', a: 1, why: 'Acquisitions are investing.' },
+          { x: 'Income taxes paid', a: 0, why: 'Operating, unless tied to a specific investing or financing transaction.' },
+          { x: 'Repaying a term loan', a: 2, why: 'Repaying debt principal is financing.' },
+          { x: 'Proceeds from selling a factory', a: 1, why: 'Disposals of long-lived assets are investing.' },
+          { x: 'Dividends received from an investment', a: 0, why: 'Operating under US GAAP (IAS 7 has allowed a choice).' }
+        ] },
       { t: 'concept', h: 'The indirect method',
         b: `Nearly every company presents CFO indirectly. Start with net income. Add back non-cash charges (D&A, SBC, impairments, deferred taxes). Remove non-cash gains. Then adjust for working capital. The rule to remember: **an increase in an operating asset uses cash; an increase in an operating liability provides cash.**` },
-      { t: 'example', h: 'Building CFO',
-        rows: [['Net income', '135'], ['+ D&A', '40'], ['+ Stock-based comp', '15'], ['− Increase in receivables', '(30)'], ['− Increase in inventory', '(20)'], ['+ Increase in payables', '10'], ['+ Increase in deferred revenue', '5'], ['Cash from operations', '155']],
-        b: `$m. CFO beats net income here because non-cash charges exceed the working capital build.` },
-      { t: 'check', q: { id: 'm1-l5-q1', kind: 'num',
-        q: 'Net income $80m, D&A $25m, receivables up $15m, payables up $6m, inventory down $4m. What is CFO?', a: 100, unit: '$m',
-        why: `80 + 25 − 15 + 6 + 4 = $100m. Falling inventory releases cash; rising receivables absorb it.` } },
+      { t: 'build', id: 'm1-l5-a2', h: 'Build CFO from two balance sheets',
+        b: 'Income statement: net income $135m, D&A $40m, stock-based comp $15m. Use the balance sheet changes below. Uses of cash are negative. $m.',
+        given: { cols: ['', 'FY24', 'FY25'], rows: [['Receivables', '120', '150'], ['Inventory', '200', '220'], ['Payables', '90', '100'], ['Deferred revenue', '40', '45']] },
+        rows: [
+          { l: 'Net income', a: 135 },
+          { l: '+ D&A', a: 40 },
+          { l: '+ Stock-based comp', a: 15 },
+          { l: 'Change in receivables', a: -30, hint: 'AR rose from 120 to 150. An asset increase uses cash.' },
+          { l: 'Change in inventory', a: -20, hint: 'Inventory rose by 20.' },
+          { l: 'Change in payables', a: 10, hint: 'A liability increase provides cash.' },
+          { l: 'Change in deferred revenue', a: 5 },
+          { l: 'Cash from operations', a: 155, tot: true }
+        ],
+        why: 'CFO beats net income because non-cash charges ($55m) exceed the working-capital build ($35m). Signs are the whole game: assets up, cash down; liabilities up, cash up.' },
       { t: 'mistake', h: 'Getting working-capital signs backwards',
         b: `The classic slip is adding an increase in receivables. If AR rose $30m, you booked $30m of revenue you haven’t collected, so subtract it. Memory aid: assets up, cash down; liabilities up, cash up. A fall in AR is a source of cash, because customers paid you.` },
       { t: 'concept', h: 'Where interest and dividends go',
         b: `Under US GAAP, interest paid, interest received and dividends received are operating cash flows; dividends paid are financing. IAS 7 has allowed choices, such as reporting interest paid in operating or financing, which hurts comparability. IFRS 18, effective for periods beginning on or after 1 January 2027, removes most of those choices for non-financial companies.`,
         note: 'IFRS 18 effective date and details as of November 2026; verify current.' },
-      { t: 'check', q: { id: 'm1-l5-q2', kind: 'mc',
-        q: 'Under US GAAP, where does interest paid on debt appear?',
-        opts: ['Operating activities', 'Investing activities', 'Financing activities', 'It isn’t on the cash flow statement'], a: 0,
-        why: `US GAAP classifies interest paid as operating, even though debt itself is a financing item. That is why the FCFF formula adds after-tax interest back to CFO (lesson 1.8).` } },
       { t: 'case', h: 'WorldCom (2002)',
         b: `WorldCom recorded ordinary “line costs” (fees paid to other carriers to carry its traffic) as capital expenditures. That moved them off the income statement, lifting EBITDA and net income, and shifted the outflow from operating to investing, inflating CFO. The SEC’s June 2002 complaint cited about $3.8bn of improperly capitalized costs. WorldCom filed for bankruptcy in July 2002.` },
       { t: 'check', q: { id: 'm1-l5-q3', kind: 'mc',
@@ -550,7 +724,7 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.6 ---------- */
-  { id: 'm1-l6', title: 'How the Three Statements Link', minutes: 6,
+  { id: 'm1-l6', title: 'How the Three Statements Link', minutes: 7,
     goals: ['The three links that make a model balance', 'Walk any transaction through IS, CFS and BS', 'Interview classics: depreciation, asset sales, SBC'],
     sources: 'CFA Program Curriculum Level I (“Financial Reporting Mechanics”); Rosenbaum & Pearl, Investment Banking: Valuation, LBOs, M&A, and IPOs (LBO model chapters); Koller, Goedhart & Wessels, Valuation (McKinsey & Company).',
     cards: [
@@ -558,22 +732,41 @@ COURSE.modules.push({
         b: `Three links connect the statements:\n1. **Net income** flows from the income statement to the top of the cash flow statement, and into retained earnings.\n2. **Non-cash items and working-capital changes** on the cash flow statement mirror movements on the balance sheet.\n3. **Ending cash** on the cash flow statement becomes cash on the balance sheet.\nIf a model doesn’t balance, one wire is cut.` },
       { t: 'example', h: 'The classic: depreciation up $10',
         b: `Tax rate 25%.\n**IS:** depreciation +$10 → pre-tax income −$10 → taxes −$2.50 → **net income −$7.50**.\n**CFS:** net income −$7.50, add back depreciation +$10 → **cash +$2.50**.\n**BS:** cash +$2.50, PP&E −$10, so assets −$7.50; retained earnings −$7.50. Balanced. The $2.50 of cash is the tax shield.` },
-      { t: 'check', q: { id: 'm1-l6-q1', kind: 'num',
-        q: 'Depreciation rises by $20; the tax rate is 21%. What is the change in cash?', a: 4.2, tol: 0.011, unit: '$',
-        why: `Net income falls 20 × (1 − 0.21) = $15.80. Add back $20 of depreciation and cash rises $4.20: the tax shield, 20 × 0.21.` } },
-      { t: 'tool', tool: 'threeStatement', h: 'Walk it through yourself',
-        b: `Pick an event, change the amount and tax rate, and watch all three statements and the balance check update.` },
-      { t: 'example', h: 'Buying inventory with cash',
-        b: `Buy $50 of inventory for cash.\n**IS:** nothing. No sale yet, so no COGS.\n**CFS:** increase in inventory, −$50 in CFO.\n**BS:** cash −$50, inventory +$50; total assets unchanged.\nWhen it’s later sold for $80: revenue +$80, COGS +$50, pre-tax profit +$30.` },
-      { t: 'check', q: { id: 'm1-l6-q2', kind: 'mc',
-        q: 'A company issues $100 of debt and immediately spends it on equipment. What is the net effect on cash?',
-        opts: ['Zero', '+$100', '−$100', 'It depends on the tax rate'], a: 0,
-        why: `CFF +$100 and CFI −$100. PP&E rises $100 and debt rises $100. Nothing hits the income statement until the equipment is depreciated and interest accrues.` } },
+      { t: 'arrows', id: 'm1-l6-a1', mode: 'amt', h: 'Trace it: depreciation +$20',
+        b: 'Depreciation rises by $20; tax rate 21%. Enter the change in every line (tap ± for decreases).',
+        groups: [
+          { g: 'Income statement', rows: [['Pre-tax income', -20], ['Income tax expense', -4.2], ['Net income', -15.8]] },
+          { g: 'Cash flow statement', rows: [['Cash from operations', 4.2]] },
+          { g: 'Balance sheet', rows: [['Cash', 4.2], ['PP&E, net', -20], ['Retained earnings', -15.8]] }
+        ],
+        why: 'Net income falls 20 × (1 − 0.21) = 15.8. Adding back the 20 of depreciation leaves cash up 4.2: the tax shield. Assets: +4.2 − 20 = −15.8, matching retained earnings.' },
+      { t: 'lab', id: 'm1-l6-a2', tool: 'threeStatement', init: { ev: 'div' }, h: 'Linker lab',
+        b: 'Use the linker to find an event that fits each description. Change the event, amount or tax rate.',
+        tasks: [
+          { x: 'An event that raises cash but lowers net income.', hint: 'Think of non-cash expenses that save tax.', test: s => s.cash > 1e-9 && s.NI < -1e-9 },
+          { x: 'An event that raises net income but lowers cash.', hint: 'Profit you haven’t collected yet.', test: s => s.NI > 1e-9 && s.cash < -1e-9 },
+          { x: 'An event that changes cash without touching net income or equity.', hint: 'Many balance-sheet-only moves qualify.', test: s => Math.abs(s.cash) > 1e-9 && Math.abs(s.NI) < 1e-9 && Math.abs(s.dE) < 1e-9 },
+          { x: 'With a 25% tax rate, make total assets fall by exactly $15.', hint: 'A $20 non-cash expense does it. So does a $15 dividend.', test: s => Math.abs(s.TA + 15) < 1e-9 && Math.abs(s.t - 0.25) < 1e-9 }
+        ],
+        debrief: 'Net income and cash part ways whenever an item is non-cash (depreciation, write-downs, SBC) or a cash flow never touches the income statement (capex, debt, dividends, working capital). The cash flow statement exists to reconcile the two.' },
+      { t: 'arrows', id: 'm1-l6-a3', mode: 'dir', h: 'Trace it: a customer prepays',
+        b: 'A customer pays $50 today for products you’ll ship next quarter. Which way does each line move today?',
+        groups: [
+          { g: 'Income statement', rows: [['Revenue', 0], ['Net income', 0]] },
+          { g: 'Cash flow statement', rows: [['Cash from operations', 1]] },
+          { g: 'Balance sheet', rows: [['Cash', 1], ['Deferred revenue', 1], ['Retained earnings', 0]] }
+        ],
+        why: 'Cash arrives but nothing is earned yet, so it sits in deferred revenue, a liability. CFO rises through the increase in deferred revenue. Revenue comes next quarter, when the goods ship.' },
       { t: 'example', h: 'Selling an asset at a gain',
         b: `Sell equipment with a $40 book value for $60 cash; tax 25%.\n**IS:** gain +$20 → taxes +$5 → net income +$15.\n**CFS:** net income +$15, subtract the non-cash gain −$20 in CFO, proceeds +$60 in CFI → **cash +$55**.\n**BS:** cash +$55, PP&E −$40, so assets +$15; retained earnings +$15. The gain comes out of CFO so the full proceeds show in investing.` },
-      { t: 'check', q: { id: 'm1-l6-q3', kind: 'num',
-        q: 'Equipment with a $70 book value is sold for $50 cash; the tax rate is 25%. What is the total change in cash?', a: 55, unit: '$',
-        why: `The $20 loss cuts net income by $15 (it saves $5 of tax). CFO: −15 + 20 (add back the loss) = +$5. CFI: +$50. Cash rises $55: the proceeds plus the tax saved.` } },
+      { t: 'arrows', id: 'm1-l6-a4', mode: 'amt', h: 'Trace it: selling at a loss',
+        b: 'Equipment with a $70 book value is sold for $50 cash; tax rate 25%. Enter each change.',
+        groups: [
+          { g: 'Income statement', rows: [['Pre-tax income', -20], ['Net income', -15]] },
+          { g: 'Cash flow statement', rows: [['Cash from operations', 5], ['Cash from investing', 50]] },
+          { g: 'Balance sheet', rows: [['Cash', 55], ['PP&E, net', -70], ['Retained earnings', -15]] }
+        ],
+        why: 'The $20 loss saves $5 of tax, so net income falls $15. CFO adds back the non-cash loss: −15 + 20 = +5, the tax saving. The full $50 of proceeds is investing. Cash +55; assets +55 − 70 = −15, matching retained earnings.' },
       { t: 'mistake', h: 'Forgetting the tax line',
         b: `Interviewers ask the depreciation question because candidates say “cash is unchanged, depreciation is non-cash.” Depreciation is non-cash, but it is tax-deductible, so it changes cash taxes. These examples assume book and tax depreciation are equal. In practice they differ, and the gap creates deferred tax assets and liabilities.` },
       { t: 'check', q: { id: 'm1-l6-q4', kind: 'mc',
@@ -585,7 +778,7 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.7 ---------- */
-  { id: 'm1-l7', title: 'Working Capital', minutes: 5,
+  { id: 'm1-l7', title: 'Working Capital', minutes: 7,
     goals: ['Operating working capital vs the accounting definition', 'DSO, DIO, DPO and the cash conversion cycle', 'Why growth consumes cash'],
     sources: 'CFA Program Curriculum Level I (“Financial Analysis Techniques”; Corporate Issuers, working capital and liquidity); Koller, Goedhart & Wessels, Valuation (McKinsey & Company); Berk & DeMarzo, Corporate Finance (“Working Capital Management”); Report of Examiner Anton R. Valukas, In re Lehman Brothers Holdings Inc. (March 2010).',
     cards: [
@@ -594,16 +787,27 @@ COURSE.modules.push({
       { t: 'concept', h: 'Three day-counts',
         f: 'DSO = <span class="fr"><span>Receivables</span><span>Revenue</span></span> × 365 &nbsp; DIO = <span class="fr"><span>Inventory</span><span>COGS</span></span> × 365<br>DPO = <span class="fr"><span>Payables</span><span>COGS</span></span> × 365 &nbsp; CCC = DSO + DIO − DPO',
         b: `The **cash conversion cycle** counts the days cash is tied up between paying suppliers and collecting from customers. Conventions vary: some analysts use average balances, 360 days, or purchases instead of COGS for DPO. Pick one and apply it consistently across peers.` },
-      { t: 'example', h: 'Compute the cycle',
-        rows: [['Revenue / COGS', '730 / 438'], ['Receivables 80', 'DSO = 80/730 × 365 = 40'], ['Inventory 60', 'DIO = 60/438 × 365 = 50'], ['Payables 48', 'DPO = 48/438 × 365 = 40'], ['Cash conversion cycle', '40 + 50 − 40 = 50 days']],
-        b: `$m and days.` },
-      { t: 'check', q: { id: 'm1-l7-q1', kind: 'num',
-        q: 'Annual revenue is $365m and receivables are $45m. What is DSO?', a: 45, unit: 'days',
-        why: `45 / 365 × 365 = 45 days. With revenue of $1m a day, $45m of receivables is 45 days of sales.` } },
+      { t: 'build', id: 'm1-l7-a1', h: 'Compute the cycle',
+        b: 'Revenue $730m, COGS $438m. Period-end receivables $80m, inventory $60m, payables $48m. Use 365 days.',
+        rows: [
+          { l: 'DSO', a: 40, unit: 'days', hint: 'Receivables ÷ revenue × 365.' },
+          { l: 'DIO', a: 50, unit: 'days', hint: 'Inventory ÷ COGS × 365.' },
+          { l: 'DPO', a: 40, unit: 'days', hint: 'Payables ÷ COGS × 365.' },
+          { l: 'Cash conversion cycle', a: 50, unit: 'days', tot: true, hint: 'DSO + DIO − DPO.' },
+          { l: 'Operating working capital', a: 92, unit: '$m', hint: 'Receivables + inventory − payables.' },
+          { l: 'Cash per day of DSO', a: 2, unit: '$m', hint: 'Revenue ÷ 365.' }
+        ],
+        why: 'About $92m is tied up in the operating cycle, and every day of DSO is worth $2m. Those are the numbers a CFO targets with a working-capital program.' },
       { t: 'concept', h: 'What one day is worth',
         b: `One day of DSO ties up revenue ÷ 365 in cash. At $3.65bn of revenue, one extra day of DSO absorbs $10m. That is why working-capital programs (faster collections, longer supplier terms, supply-chain finance) can release hundreds of millions without changing profit. It is also why a sudden jump in DSO needs an explanation.` },
-      { t: 'tool', tool: 'ccc', h: 'Cash conversion cycle',
-        b: `Move DSO, DIO and DPO and watch how much cash the cycle ties up.` },
+      { t: 'lab', id: 'm1-l7-a2', tool: 'ccc', h: 'Working-capital lab',
+        b: 'You are the new CFO. Revenue $1,000m, COGS 60% of revenue, DSO 45, DIO 60, DPO 40.',
+        tasks: [
+          { x: 'Release at least $50m of cash by changing DSO only.', hint: 'Each day of DSO is worth about $2.7m here. You need about 19 days.', test: s => s.rev === 1000 && s.cg === 60 && s.dio === 60 && s.dpo === 40 && s.owc <= 106.17 },
+          { x: 'Make the cash conversion cycle negative.', hint: 'Push DPO above DSO + DIO.', test: s => s.ccc < 0 },
+          { x: 'Double revenue to $2,000m and watch working capital.', hint: 'Drag revenue to 2,000.', test: s => s.rev >= 2000 }
+        ],
+        debrief: 'At constant days, working capital scales with revenue: double sales, double the cash tied up. That is why fast growers burn cash, and why negative-cycle businesses, where suppliers fund customers, can grow almost for free.' },
       { t: 'check', q: { id: 'm1-l7-q2', kind: 'num',
         q: 'Revenue is $1,825m. DSO falls from 50 to 44 days. How much cash is released?', a: 30, unit: '$m',
         why: `Revenue per day = 1,825 / 365 = $5m. Six fewer days × $5m = $30m released.` } },
@@ -612,32 +816,47 @@ COURSE.modules.push({
         note: 'Simplification: this treats the whole cycle as days of revenue. A full build uses COGS for inventory and payables.' },
       { t: 'case', h: 'Negative working capital',
         b: `Some retailers collect from customers within days (card payments) but pay suppliers over weeks or months. That produces a **negative** cash conversion cycle: suppliers effectively finance growth. Amazon is the textbook example. The flip side: if growth stalls or reverses, the float shrinks and the business starts consuming cash.` },
-      { t: 'check', q: { id: 'm1-l7-q3', kind: 'mc',
-        q: 'Which change releases cash, all else equal?',
-        opts: ['DPO rises from 30 to 45 days', 'DIO rises from 40 to 55 days', 'DSO rises from 35 to 50 days', 'The cash conversion cycle lengthens'], a: 0,
-        why: `Paying suppliers later keeps cash in the business longer. Higher DIO, higher DSO and a longer cycle all tie up more cash.` } },
       { t: 'case', h: 'Lehman’s Repo 105',
         b: `Balance sheets are measured at period-end, which invites window dressing. The Lehman bankruptcy examiner’s report (Valukas, 2010) found Lehman used “Repo 105” transactions to move about $50bn of assets off its balance sheet at the end of Q2 2008, lowering reported net leverage, then brought them back days later. Compare period-end balances with averages when you can.` }
     ] },
 
   /* ---------- 1.8 ---------- */
-  { id: 'm1-l8', title: 'Cash Flow Analysis: FCFF and FCFE', minutes: 6,
+  { id: 'm1-l8', title: 'Cash Flow Analysis: FCFF and FCFE', minutes: 7,
     goals: ['FCFF vs FCFE and the discount rate each needs', 'The CFA formulas, and why interest is added back after tax', 'Maintenance capex and stock-based comp'],
     sources: 'CFA Program Curriculum Level II, Equity Valuation (“Free Cash Flow Valuation”); Damodaran, Investment Valuation; Koller, Goedhart & Wessels, Valuation (McKinsey & Company); SEC press release on settlements with J.P. Morgan Chase and Citigroup over Enron transactions (July 2003).',
     cards: [
       { t: 'concept', h: 'Two kinds of free cash flow',
         b: `**FCFF** (free cash flow to the firm) is cash available to all capital providers, debt and equity, after operating costs, taxes and reinvestment. Discount it at WACC to get enterprise value. **FCFE** (to equity) is what is left for shareholders after paying debt holders and adding net borrowing. Discount it at the cost of equity to get equity value. Discounting FCFE at WACC is a classic error.` },
+      { t: 'sort', id: 'm1-l8-a1', h: 'Which discount rate?',
+        b: 'Match each cash flow to the rate that discounts it.',
+        buckets: ['WACC', 'Cost of equity'],
+        items: [
+          { x: 'FCFF', a: 0, why: 'Cash flow to all capital providers: discount at the blended cost of all capital.' },
+          { x: 'FCFE', a: 1, why: 'Cash flow to shareholders only: discount at their required return.' },
+          { x: 'Dividends', a: 1, why: 'Paid to equity holders.' },
+          { x: 'Unlevered free cash flow', a: 0, why: 'Another name for FCFF: before any financing flows.' },
+          { x: 'Cash flow after interest and net borrowing', a: 1, why: 'That is FCFE.' },
+          { x: 'NOPAT minus net investment', a: 0, why: 'An operating, pre-financing cash flow: FCFF.' }
+        ] },
       { t: 'concept', h: 'The formulas (CFA notation)',
         f: 'FCFF = NI + NCC + Int(1 − <i>t</i>) − FCInv − WCInv<br>FCFF = CFO + Int(1 − <i>t</i>) − FCInv<br>FCFF = EBIT(1 − <i>t</i>) + Dep − FCInv − WCInv<br>FCFE = CFO − FCInv + Net borrowing',
         b: `NCC = non-cash charges. FCInv = fixed capital investment (capex net of asset sales). WCInv = investment in working capital. Int = interest expense. With consistent inputs, all three FCFF routes give the same number.` },
-      { t: 'example', h: 'From EBIT to FCFF and FCFE',
-        b: `EBIT $200m, tax 25%, D&A $40m, capex $70m, operating working capital up $15m.\nNOPAT = 200 × 0.75 = $150m.\n**FCFF** = 150 + 40 − 70 − 15 = **$105m**.\nAdd interest of $20m and net new borrowing of $10m:\n**FCFE** = 105 − 20 × 0.75 + 10 = **$100m**.` },
+      { t: 'build', id: 'm1-l8-a2', h: 'From EBIT to FCFF and FCFE',
+        b: 'EBIT $200m, tax 25%, D&A $40m, capex $70m, operating working capital up $15m, interest expense $20m, net new borrowing $10m. $m.',
+        rows: [
+          { l: 'NOPAT', a: 150, hint: 'EBIT × (1 − t).' },
+          { l: '+ D&A', a: 40 },
+          { l: '− Capex', a: -70 },
+          { l: '− Increase in working capital', a: -15 },
+          { l: 'FCFF', a: 105, tot: true },
+          { l: '− After-tax interest', a: -15, hint: '20 × (1 − 0.25).' },
+          { l: '+ Net borrowing', a: 10 },
+          { l: 'FCFE', a: 100, tot: true }
+        ],
+        why: 'Discount the 105 at WACC for enterprise value, or the 100 at the cost of equity for equity value. The interest tax shield lives in WACC (the after-tax cost of debt), so FCFF leaves it out.' },
       { t: 'check', q: { id: 'm1-l8-q1', kind: 'num',
         q: 'CFO $300m, interest expense $40m, tax rate 25%, capex $120m. What is FCFF?', a: 210, unit: '$m',
         why: `FCFF = CFO + Int(1 − t) − FCInv = 300 + 40 × 0.75 − 120 = $210m.` } },
-      { t: 'check', q: { id: 'm1-l8-q2', kind: 'num',
-        q: 'Same firm, with net borrowing of +$20m. What is FCFE?', a: 200, unit: '$m',
-        why: `FCFE = CFO − FCInv + net borrowing = 300 − 120 + 20 = $200m. Check: FCFF − Int(1 − t) + net borrowing = 210 − 30 + 20 = $200m.` } },
       { t: 'mistake', h: 'Adding back interest in full',
         b: `Under US GAAP, CFO is already after interest. FCFF is meant to be before financing, so you add interest back, but only Int × (1 − t), because the deduction saved taxes and that saving is already in CFO. In a DCF the tax shield is captured in WACC through the after-tax cost of debt. Leaving it in FCFF as well counts it twice.` },
       { t: 'concept', h: 'Maintenance vs growth capex',
@@ -659,7 +878,7 @@ COURSE.modules.push({
     ] },
 
   /* ---------- 1.9 ---------- */
-  { id: 'm1-l9', title: 'Quality of Earnings', minutes: 6,
+  { id: 'm1-l9', title: 'Quality of Earnings', minutes: 7,
     goals: ['What makes earnings high quality', 'Accruals ratio and cash conversion', 'Red flags, screening models and how a fund uses them'],
     sources: 'CFA Program Curriculum (“Financial Reporting Quality”, “Evaluating Quality of Financial Reports”); Sloan (1996), The Accounting Review; Beneish (1999), “The Detection of Earnings Manipulation,” Financial Analysts Journal; Wirecard AG ad hoc disclosures (June 2020).',
     cards: [
@@ -671,30 +890,121 @@ COURSE.modules.push({
         note: 'How much of the accrual anomaly survived after publication is debated in later research.' },
       { t: 'example', h: 'Same EPS, different quality',
         b: `**Firm A:** net income $100m, CFO $130m.\n**Firm B:** net income $100m, CFO $40m; receivables up $45m and inventory up $25m.\nCash conversion (CFO ÷ NI): A = 1.3×, B = 0.4×. B’s profit is mostly unpaid invoices and unsold goods. Before trusting B’s guidance, find out why customers aren’t paying and why stock is piling up.` },
-      { t: 'check', q: { id: 'm1-l9-q1', kind: 'num',
-        q: 'Net income $250m; CFO $175m. What is the cash conversion ratio (CFO ÷ NI)?', a: 0.7, tol: 0.006, unit: '×',
-        why: `175 / 250 = 0.70×. A mature company persistently below 1.0× deserves a working-capital and accruals review.` } },
       { t: 'check', q: { id: 'm1-l9-q2', kind: 'num',
         q: 'Net income $120m, CFO $90m, CFI −$50m, average net operating assets $800m. What is the cash-flow accruals ratio?', a: 10, unit: '%',
         why: `Accruals = NI − (CFO + CFI) = 120 − (90 − 50) = $80m. Ratio = 80 / 800 = 10%. Watch the sign: CFI is negative, so the bracket is only $40m.` } },
+      { t: 'lab', id: 'm1-l9-a1', tool: 'quarter', h: 'Make the quarter',
+        b: 'You are the CFO. Consensus expects EPS of $0.80; the honest number is $0.68. Pull the accounting levers and watch what an analyst would see.',
+        tasks: [
+          { x: 'Beat the $0.80 consensus.', hint: 'Any lever that adds about $17m of pre-tax profit works.', test: s => s.eps >= 0.8 - 1e-9 },
+          { x: 'Beat it while keeping cash conversion (CFO ÷ net income) at 1.0× or better.', hint: 'One lever raises CFO as well as earnings. WorldCom used it.', test: s => s.eps >= 0.8 - 1e-9 && s.conv >= 1 },
+          { x: 'Beat it while tripping only one red flag.', hint: 'Use a single lever. Several work on their own.', test: s => s.eps >= 0.8 - 1e-9 && s.flags <= 1 }
+        ],
+        debrief: 'Every lever produced a beat that EPS alone can’t detect, and every lever left a footprint: DSO (pulled-forward sales), reserve coverage (reserve releases), D&A versus capex (asset lives, capitalization), cash conversion and payables days. That is why quality-of-earnings work tracks these ratios every quarter.' },
+      { t: 'hunt', id: 'm1-l9-a2', h: 'Investigate Company X',
+        b: 'Three years of selected data, $m. Tap the four rows that should worry you, then check.',
+        cols: ['FY23', 'FY24', 'FY25'], need: 4,
+        rows: [
+          { l: 'Revenue', v: ['800', '880', '960'], why: 'Steady growth of about 9–10% a year. Not a concern on its own.' },
+          { l: 'Receivables', v: ['100', '115', '180'], flag: true, why: 'Up 57% in FY25 while revenue grew 9%. DSO jumped from about 48 to 68 days: pulled-forward or uncollectible sales.' },
+          { l: 'Inventory', v: ['120', '130', '140'], why: 'Growing roughly in line with sales.' },
+          { l: 'Gross margin', v: ['38.0%', '38.5%', '39.0%'], why: 'Stable to slightly better. Fine.' },
+          { l: 'Allowance for doubtful accounts', v: ['8', '9', '6'], flag: true, why: 'Falling while receivables jump: coverage dropped from 7.8% to 3.3% of receivables. A smaller provision flattered earnings.' },
+          { l: 'Capitalized software costs', v: ['0', '0', '25'], flag: true, why: 'A new capitalization policy moved $25m of costs out of the income statement and into investing cash flow.' },
+          { l: 'Net income', v: ['60', '66', '84'], why: 'Up 27%, which looks great. Whether it is real depends on the rows around it.' },
+          { l: 'Cash from operations', v: ['75', '80', '52'], flag: true, why: 'Down 35% while net income rose 27%: cash conversion fell from 1.2× to 0.6×. Earnings are not turning into cash.' },
+          { l: 'Capex', v: ['40', '42', '45'], why: 'Modest growth, in line with the business.' }
+        ],
+        debrief: 'Each flag alone could be innocent. Together, rising DSO, falling reserves, newly capitalized costs and collapsing cash conversion tell one story: earnings are being pulled forward. This cluster is what screens such as the Beneish M-score look for.' },
       { t: 'concept', h: 'Red-flag checklist',
         b: `• Revenue growth with rising DSO\n• Inventory growing faster than sales\n• Capitalizing costs that peers expense\n• Longer asset lives\n• Reserves shrinking relative to exposure\n• “Non-recurring” charges every year\n• A widening gap between non-GAAP and GAAP earnings\n• Quarter-end spikes in sales or cash\n• Auditor changes, late filings, CFO turnover\nOne flag isn’t fraud. Clusters deserve work.` },
-      { t: 'check', q: { id: 'm1-l9-q3', kind: 'mc',
-        q: 'Revenue +12%, receivables +40%, inventory +35%, CFO −20%. What is the best reading?',
-        opts: ['Possible channel stuffing or early revenue recognition; check DSO and payment terms', 'Strong demand', 'Improving cash conversion', 'Nothing unusual'], a: 0,
-        why: `Receivables and inventory are growing about three times faster than sales while cash flow falls. That pattern fits pulling sales forward or booking revenue early. It isn’t proof, but it is exactly where to dig.` } },
       { t: 'concept', h: 'The Beneish M-score',
         b: `Beneish’s (1999) M-score is a probit model built on eight ratios, including days’ sales in receivables, gross margin, asset quality, sales growth and total accruals to total assets, estimated on firms known to have manipulated earnings. A higher score means a higher estimated probability of manipulation. Use it as a screen that tells you where to dig, not as a verdict. It throws false positives, especially among fast growers.` },
       { t: 'mistake', h: 'Trusting “one-time” items',
         b: `Restructuring charges, special items, litigation and impairments are excluded from adjusted EPS as one-offs. Count them over 5 to 10 years; if they recur, average them into normalized earnings. Also watch for a **big bath**: dumping excess costs into one bad quarter so later quarters look better. Some of those reserves can later be released back into income.` },
       { t: 'case', h: 'Wirecard (2020)',
         b: `Wirecard, a German payments company in the DAX index, reported about €1.9bn of cash held in third-party trust accounts in Asia. In June 2020 its auditor, EY, said it could not obtain sufficient evidence that the balances existed. Wirecard then said the cash most likely didn’t exist and filed for insolvency within days. Even cash can be faked when nobody confirms it directly with the bank.` },
-      { t: 'check', q: { id: 'm1-l9-q4', kind: 'mc',
-        q: 'Which is the strongest evidence of high earnings quality?',
-        opts: ['CFO consistently at or above net income, stable DSO and DIO, conservative policies', 'Rising non-GAAP margins', 'Beating consensus EPS by exactly one cent for twelve straight quarters', 'Large reserve releases in the latest year'], a: 0,
-        why: `Cash backing, stable working capital and conservative policies are hallmarks of quality. A long streak of one-cent beats is a classic sign of earnings management, and reserve releases flatter current profit.` } },
       { t: 'concept', h: 'How a fund uses this',
         b: `A long/short analyst rebuilds clean EBITDA and FCF, compares non-GAAP and GAAP trends, tracks DSO, DIO and reserves every quarter, reads the revenue recognition and critical accounting estimates notes, and benchmarks policies against peers. Short sellers specialize in this work, and they get it wrong too. The goal isn’t to find fraud; it is to know what the earnings are actually worth.` }
+    ] },
+
+  /* ---------- 1.10 (lab) ---------- */
+  { id: 'm1-l10', title: 'Lab: Book Northwind’s First Month', minutes: 7, lab: true,
+    goals: ['Post ten real transactions with double entry', 'Watch a balance sheet build up from zero', 'Keep assets = liabilities + equity at every step'],
+    sources: 'CFA Program Curriculum Level I (“Financial Reporting Mechanics”); Berk & DeMarzo, Corporate Finance (“Introduction to Financial Statement Analysis”). Northwind Roasters is a fictional company built for this exercise.',
+    cards: [
+      { t: 'concept', h: 'Meet Northwind Roasters',
+        b: `Northwind is a coffee roaster opening in March, and you are its first accountant. You’ll post every transaction of the month. In the next lab you’ll build its income statement and cash flow statement from your own books. Ignore taxes. In the ledger, sales and expenses flow straight to retained earnings. All figures in $000s.` },
+      { t: 'ledger', id: 'm1-l10-a1', h: 'Close the books for March',
+        b: 'Post each transaction. Enter the change in every account it touches; tap ± for decreases. $000s.',
+        unit: '$k',
+        accounts: [['Cash', 'A'], ['Receivables', 'A'], ['Inventory', 'A'], ['Equipment (net)', 'A'], ['Payables', 'L'], ['Accrued liabilities', 'L'], ['Deferred revenue', 'L'], ['Debt', 'L'], ['Share capital', 'E'], ['Retained earnings', 'E']],
+        tx: [
+          { x: 'The founders invest $200k in exchange for shares.', e: { 'Cash': 200, 'Share capital': 200 }, why: 'Cash in, contributed capital up.' },
+          { x: 'Northwind borrows $100k from a bank.', e: { 'Cash': 100, 'Debt': 100 }, why: 'Asset and liability rise together. Borrowing is never income.' },
+          { x: 'It buys roasting equipment for $120k cash.', e: { 'Cash': -120, 'Equipment (net)': 120 }, why: 'Capex swaps cash for a long-lived asset. No expense today; depreciation spreads the cost.' },
+          { x: 'It buys $60k of green coffee on credit.', e: { 'Inventory': 60, 'Payables': 60 }, why: 'Inventory and payables both rise. No cash moves yet.' },
+          { x: 'It sells roasted coffee for $90k: $50k paid in cash, $40k on credit. The coffee sold cost $36k.', e: { 'Cash': 50, 'Receivables': 40, 'Inventory': -36, 'Retained earnings': 54 }, hint: 'Four accounts move: the two ways the customer pays, the inventory that left, and the profit (90 − 36).', why: 'Revenue of $90k is earned whether or not it is collected. Profit of $54k (90 − 36) goes to retained earnings; inventory falls by its cost.' },
+          { x: 'A café chain prepays $30k for April deliveries.', e: { 'Cash': 30, 'Deferred revenue': 30 }, why: 'Cash before delivery is a liability. It becomes revenue in April.' },
+          { x: 'Northwind pays $25k of March wages in cash.', e: { 'Cash': -25, 'Retained earnings': -25 }, why: 'An expense paid immediately: cash and retained earnings both fall.' },
+          { x: 'It records $2k of depreciation on the equipment.', e: { 'Equipment (net)': -2, 'Retained earnings': -2 }, why: 'A non-cash expense: the asset’s book value falls and so does profit. Cash is untouched.' },
+          { x: 'It pays $35k of the supplier bill.', e: { 'Cash': -35, 'Payables': -35 }, why: 'Settling a liability. No expense: the coffee’s cost was expensed when it was sold.' },
+          { x: 'March interest of $1k on the loan is owed but won’t be paid until April.', e: { 'Accrued liabilities': 1, 'Retained earnings': -1 }, hint: 'An expense incurred but not yet paid.', why: 'An accrued expense: profit falls now, the cash goes out next month.' }
+        ] },
+      { t: 'check', q: { id: 'm1-l10-q1', kind: 'mc',
+        q: 'Northwind ends March with $200k of cash, exactly what the founders put in. Did it break even?',
+        opts: ['No: it made $26k of profit, but cash was shaped by the loan, equipment and working capital', 'Yes: unchanged cash means zero profit', 'No: it lost $26k', 'There is no way to tell from the ledger'], a: 0,
+        why: `Retained earnings rose $26k (54 − 25 − 2 − 1), so it made a profit. Cash tells a different story: $300k came in from founders and the bank, $120k went into equipment, and working capital moved the rest. Profit and cash answer different questions.` } },
+      { t: 'concept', h: 'What you just built',
+        b: `Ending balance sheet ($000s): assets 382 (cash 200, receivables 40, inventory 24, equipment 118) = liabilities 156 (payables 25, accrued 1, deferred revenue 30, debt 100) + equity 226 (share capital 200, retained earnings 26). Every financial model is this ledger compressed: forecast the transactions and the statements follow.` }
+    ] },
+
+  /* ---------- 1.11 (lab) ---------- */
+  { id: 'm1-l11', title: 'Lab: Build Northwind’s Statements', minutes: 6, lab: true,
+    goals: ['Build an income statement from a ledger', 'Build CFO with the indirect method and tie it to cash', 'Explain the gap between profit and cash'],
+    sources: 'CFA Program Curriculum Level I (“Analyzing Income Statements”, “Analyzing Statements of Cash Flows”); Rosenbaum & Pearl, Investment Banking (financial statement modeling). Northwind Roasters is a fictional company built for this exercise.',
+    cards: [
+      { t: 'build', id: 'm1-l11-a1', h: 'Build the income statement',
+        b: 'From Northwind’s March ledger. Enter costs as negatives (tap ±). $000s.',
+        given: { rows: [['Sales (cash + credit)', '90'], ['Cost of coffee sold', '36'], ['Wages', '25'], ['Depreciation', '2'], ['Interest (accrued, unpaid)', '1'], ['Café prepayment for April', '30']] },
+        rows: [
+          { l: 'Revenue', a: 90, hint: 'Only goods delivered in March count.' },
+          { l: 'Cost of goods sold', a: -36 },
+          { l: 'Gross profit', a: 54, tot: true },
+          { l: 'Gross margin', a: 60, unit: '%' },
+          { l: 'Wages', a: -25 },
+          { l: 'Depreciation', a: -2 },
+          { l: 'Operating income (EBIT)', a: 27, tot: true },
+          { l: 'Interest expense', a: -1, hint: 'Accrued interest is an expense even though it is unpaid.' },
+          { l: 'Net income', a: 26, tot: true }
+        ],
+        why: 'Net income of $26k equals the change in retained earnings in your ledger. The $30k café prepayment is not revenue: the coffee ships in April.' },
+      { t: 'build', id: 'm1-l11-a2', h: 'Build the cash flow statement',
+        b: 'Indirect method. Every balance started at zero, so each March 31 balance is also the change. Uses of cash are negative. $000s.',
+        given: { cols: ['Balance sheet', 'Mar 31'], rows: [['Receivables', '40'], ['Inventory', '24'], ['Equipment (net)', '118'], ['Payables', '25'], ['Accrued liabilities', '1'], ['Deferred revenue', '30'], ['Debt', '100'], ['Share capital', '200']] },
+        rows: [
+          { l: 'Net income', a: 26 },
+          { l: '+ Depreciation', a: 2 },
+          { l: 'Change in receivables', a: -40 },
+          { l: 'Change in inventory', a: -24 },
+          { l: 'Change in payables', a: 25 },
+          { l: 'Change in accrued liabilities', a: 1 },
+          { l: 'Change in deferred revenue', a: 30 },
+          { l: 'Cash from operations', a: 20, tot: true },
+          { l: 'Capex', a: -120, hint: 'Equipment ended at 118 after 2 of depreciation, so 120 was bought.' },
+          { l: 'Cash from investing', a: -120, tot: true },
+          { l: 'Debt raised', a: 100 },
+          { l: 'Shares issued', a: 200 },
+          { l: 'Cash from financing', a: 300, tot: true },
+          { l: 'Net change in cash', a: 200, tot: true, hint: 'CFO + CFI + CFF. It should match the cash in your ledger.' }
+        ],
+        why: 'It ties: +200 matches the ledger’s cash. CFO (20) trails net income (26) because receivables and inventory absorbed 64, only partly offset by payables, accrued interest and the café’s prepayment (56), plus 2 of depreciation.' },
+      { t: 'check', q: { id: 'm1-l11-q1', kind: 'mc',
+        q: 'Northwind wants higher CFO next month without changing profit. Which move does it?',
+        opts: ['Collect the $40k of receivables faster', 'Raise more debt', 'Issue new shares', 'Pay a dividend'], a: 0,
+        why: `Collecting receivables turns an operating asset into cash, which raises CFO. Debt and shares are financing inflows; a dividend is a financing outflow. None of those touch CFO.` } },
+      { t: 'concept', h: 'This is what a model does',
+        b: `A three-statement model is this lab on repeat: forecast revenue, costs and working-capital days, and the statements (and the cash balance) follow. When a model doesn’t balance, the bug is almost always a transaction posted to one side only, which is exactly what the ledger stopped you from doing.` }
     ] }
   ],
 
@@ -930,7 +1240,7 @@ const lessonNo = (m, i) => m.num + '.' + (i + 1);
 
 /* ---------- persistent state (localStorage, always wrapped) ---------- */
 const KEY = 'buyside-curriculum-v1';
-const fresh = () => ({ v: 1, xp: 0, streak: { count: 0, best: 0, last: null }, lessons: {}, answered: {}, srs: {}, quiz: {}, resume: null, settings: { theme: 'dark' }, stats: { correct: 0, total: 0 }, days: {} });
+const fresh = () => ({ v: 1, xp: 0, streak: { count: 0, best: 0, last: null }, lessons: {}, answered: {}, srs: {}, quiz: {}, acts: {}, resume: null, settings: { theme: 'dark' }, stats: { correct: 0, total: 0 }, days: {} });
 let S = fresh();
 try { const raw = localStorage.getItem(KEY); if (raw) { const o = JSON.parse(raw); if (o && typeof o === 'object') S = Object.assign(fresh(), o); } } catch (e) { /* storage unavailable: run in memory */ }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* ignore */ } }
@@ -1162,8 +1472,228 @@ function sortable(ul) {
   ul.addEventListener('pointerup', end); ul.addEventListener('pointercancel', end);
 }
 
+/* ---------- hands-on activities ----------
+   Each ACT[type](card, box, done, uid) renders into box and calls done(score 0..1) once,
+   on the learner's first complete attempt. Retries stay open afterwards.            */
+function once(fn) { let fired = false; return v => { if (!fired) { fired = true; fn(v); } }; }
+function sgnInput(uid, unit) {
+  const w = document.createElement('span'); w.className = 'sin';
+  w.innerHTML = `<button type="button" class="sg" aria-label="Switch sign (currently plus)">+</button><input id="${uid}" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="next" aria-label="Amount${unit ? ' in ' + esc(unit) : ''}">${unit ? `<span class="u">${esc(unit)}</span>` : ''}`;
+  const b = w.querySelector('.sg'), inp = w.querySelector('input'); let neg = false;
+  const paint = () => { b.textContent = neg ? '−' : '+'; b.classList.toggle('neg', neg); b.setAttribute('aria-label', 'Switch sign (currently ' + (neg ? 'minus' : 'plus') + ')'); };
+  b.addEventListener('click', () => { if (inp.readOnly) return; neg = !neg; paint(); inp.dispatchEvent(new Event('input', { bubbles: true })); });
+  inp.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); inp.blur(); } });
+  w.get = () => { const v = parseNum(inp.value); if (v == null) return null; return neg ? -v : v; };
+  w.set = v => { neg = v < 0; paint(); inp.value = String(+Math.abs(v).toFixed(4)); };
+  w.lock = () => { inp.readOnly = true; b.disabled = true; };
+  return w;
+}
+function seg3() {
+  const w = document.createElement('span'); w.className = 'seg3'; w.setAttribute('role', 'group');
+  w.innerHTML = [[-1, '↓', 'Decreases'], [0, '0', 'No change'], [1, '↑', 'Increases']].map(([v, t, l]) => `<button type="button" data-v="${v}" aria-label="${l}" aria-pressed="false">${t}</button>`).join('');
+  let val = null;
+  const paint = () => $$('button', w).forEach(b => b.setAttribute('aria-pressed', String(+b.dataset.v === val)));
+  w.addEventListener('click', e => { const b = e.target.closest('button'); if (!b || w.dataset.locked) return; val = +b.dataset.v; paint(); });
+  w.get = () => val; w.set = v => { val = Math.sign(v); paint(); }; w.lock = () => { w.dataset.locked = '1'; $$('button', w).forEach(b => { b.disabled = true; }); };
+  return w;
+}
+function givenTable(g) {
+  const d = document.createElement('div');
+  if (g.cols) d.innerHTML = `<div class="gtab"><table><thead><tr>${g.cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>${g.rows.map(r => `<tr>${r.map((c, k) => k ? `<td>${esc(c)}</td>` : `<th scope="row">${esc(c)}</th>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+  else d.innerHTML = `<div class="rows given-kv">${g.rows.map(r => `<div><span>${esc(r[0])}</span><span>${esc(r[1])}</span></div>`).join('')}</div>`;
+  return d.firstElementChild;
+}
+function adjPct(v, r) { return (r.unit === '%' && Math.abs(v) <= 1 && Math.abs(r.a) > 1) ? v * 100 : v; }
+const ansFmt = (r, dir) => dir ? (r.a > 0 ? '↑' : r.a < 0 ? '↓' : 'no change') : sgn(r.a, 4) + (r.unit ? ' ' + r.unit : '');
+function answerRows(rows, uid) {
+  const el = document.createElement('div'); el.className = 'arows';
+  const items = [];
+  rows.forEach((r, k) => {
+    const row = document.createElement('div');
+    if (r.g) { row.className = 'agrp eyebrow'; row.textContent = r.g; el.appendChild(row); return; }
+    row.className = 'arow' + (r.tot ? ' tot' : '');
+    row.innerHTML = `<span class="al">${md(r.l)}</span>`;
+    if (r.a === undefined) { row.classList.add('given'); row.insertAdjacentHTML('beforeend', `<span class="gv">${esc(r.v)}</span>`); el.appendChild(row); return; }
+    const ctl = r.dir ? seg3() : sgnInput(uid + '-' + k, r.unit && r.unit !== '$' ? r.unit : '');
+    row.appendChild(ctl);
+    const hint = document.createElement('div'); hint.className = 'ahint'; hint.hidden = true; row.appendChild(hint);
+    el.appendChild(row); items.push({ r, row, ctl, hint });
+  });
+  const isOk = it => { const v = it.ctl.get(); if (v == null) return false; if (it.r.dir) return v === Math.sign(it.r.a); const tol = it.r.tol != null ? it.r.tol : 0.011; return Math.abs(adjPct(v, it.r) - it.r.a) <= tol + 1e-9; };
+  return {
+    el,
+    blanks: () => items.filter(it => it.ctl.get() == null).length,
+    check() {
+      let right = 0;
+      items.forEach(it => {
+        const ok = isOk(it); if (ok) right++;
+        it.row.classList.toggle('ok', ok); it.row.classList.toggle('no', !ok);
+        it.hint.hidden = ok || !it.r.hint; if (!ok && it.r.hint) it.hint.textContent = it.r.hint;
+      });
+      return { right, total: items.length, allOk: right === items.length };
+    },
+    reveal() { items.forEach(it => { if (!isOk(it)) { it.ctl.set(it.r.a); it.row.classList.add('shown'); } it.row.classList.remove('no'); it.row.classList.add('ok'); it.hint.hidden = true; it.ctl.lock(); }); },
+    lock() { items.forEach(it => it.ctl.lock()); }
+  };
+}
+function gridActivity(c, box, done, uid, rows) {
+  if (c.given) box.appendChild(givenTable(c.given));
+  const ar = answerRows(rows, uid); box.appendChild(ar.el);
+  const fb = document.createElement('div'); fb.className = 'fb'; fb.hidden = true; fb.setAttribute('role', 'status');
+  const bar = document.createElement('div'); bar.className = 'btn-row';
+  bar.innerHTML = `<button type="button" class="btn primary" data-a="check">Check</button><button type="button" class="btn" data-a="show" hidden>Show answers</button>`;
+  box.append(bar, fb);
+  const fin = once(done);
+  let tries = 0;
+  bar.addEventListener('click', e => {
+    const a = e.target.closest('[data-a]'); if (!a) return;
+    if (a.dataset.a === 'check') {
+      const blanks = ar.blanks();
+      if (blanks) { toast(c.mode === 'dir' ? 'Pick a direction for every line' : 'Fill every blank (0 for no change)'); return; }
+      const res = ar.check(); tries++; fin(res.right / res.total);
+      if (res.allOk) { ar.lock(); bar.hidden = true; fb.className = 'fb ok'; fb.innerHTML = `<span class="v">All ${res.total} correct${tries > 1 ? ' on try ' + tries : ''}</span><div>${md(c.why)}</div>`; }
+      else { fb.className = 'fb no'; fb.innerHTML = `<span class="v">${res.right} of ${res.total} right</span><div>Fix the red lines and check again.${c.mode === 'dir' ? '' : ' Watch the signs.'}</div>`; $('[data-a="show"]', bar).hidden = false; }
+      fb.hidden = false; requestAnimationFrame(() => fb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+    } else {
+      fin(0); ar.reveal(); bar.hidden = true; fb.className = 'fb ok'; fb.innerHTML = `<span class="v">Answers filled in</span><div>${md(c.why)}</div>`; fb.hidden = false;
+    }
+  });
+}
+const ACT = {
+  build(c, box, done, uid) { gridActivity(c, box, done, uid, c.rows); },
+  arrows(c, box, done, uid) {
+    const rows = []; c.groups.forEach(g => { rows.push({ g: g.g }); g.rows.forEach(([l, a]) => rows.push({ l, a, dir: c.mode === 'dir' })); });
+    gridActivity(c, box, done, uid, rows);
+  },
+  sort(c, box, done) {
+    const items = shuffle(c.items), n = items.length, misses = []; let k = 0, right = 0;
+    const fin = once(done);
+    function render() {
+      if (k >= n) {
+        fin(right / n);
+        box.innerHTML = `<div class="kpis"><div class="kpi hl"><div class="l">Sorted correctly</div><div class="v">${right}/${n}</div></div></div>${misses.length ? `<div class="stack" style="gap:8px"><div class="eyebrow">Review these</div>${misses.map(m => `<div class="note"><div style="color:var(--fg);margin-bottom:3px"><strong>${md(m.x)}</strong> → ${esc(c.buckets[m.a])}</div>${md(m.why)}</div>`).join('')}</div>` : '<p class="sub">Perfect sort.</p>'}<button type="button" class="btn" data-a="again">Sort again</button>`;
+        $('[data-a="again"]', box).addEventListener('click', () => { k = 0; right = 0; misses.length = 0; items.splice(0, n, ...shuffle(c.items)); render(); });
+        return;
+      }
+      const it = items[k];
+      box.innerHTML = `<div class="act-meta"><span>Item ${k + 1} of ${n}</span><span>${right} right</span></div><div class="sort-item">${md(it.x)}</div><div class="bk">${c.buckets.map((b, j) => `<button type="button" data-j="${j}">${esc(b)}</button>`).join('')}</div><div class="fb" hidden role="status"></div><button type="button" class="btn primary block" data-a="next" hidden>${k === n - 1 ? 'See results' : 'Next item'}</button>`;
+      const bk = $('.bk', box);
+      bk.addEventListener('click', e => {
+        const b = e.target.closest('button'); if (!b || bk.dataset.done) return; bk.dataset.done = '1';
+        const j = +b.dataset.j, ok = j === it.a; if (ok) right++; else misses.push(it);
+        $$('button', bk).forEach(x => { x.disabled = true; if (+x.dataset.j === it.a) x.classList.add('right'); else if (x === b) x.classList.add('wrong'); else x.classList.add('dim'); });
+        const fb = $('.fb', box); fb.className = 'fb ' + (ok ? 'ok' : 'no'); fb.innerHTML = `<span class="v">${ok ? 'Correct' : 'It’s ' + esc(c.buckets[it.a])}</span><div>${md(it.why)}</div>`; fb.hidden = false;
+        $('[data-a="next"]', box).hidden = false;
+        $('.act-meta span:last-child', box).textContent = right + ' right';
+      });
+      $('[data-a="next"]', box).addEventListener('click', () => { k++; render(); });
+    }
+    render();
+  },
+  hunt(c, box, done) {
+    const fin = once(done), n = c.cols.length;
+    box.innerHTML = `<div class="hunt" style="--n:${n}"><div class="hrow hhead" aria-hidden="true"><span></span>${c.cols.map(x => `<span class="v">${esc(x)}</span>`).join('')}</div>${c.rows.map((r, k) => `<button type="button" class="hrow" data-k="${k}" aria-pressed="false"><span class="hl">${esc(r.l)}</span>${r.v.map(v => `<span class="v">${esc(v)}</span>`).join('')}</button><div class="hwhy" data-w="${k}" hidden></div>`).join('')}</div>
+      <div class="act-meta"><span id="${'hc' + (++qn)}">0 of ${c.need} flagged</span><span>tap a row to flag it</span></div>
+      <button type="button" class="btn primary block" data-a="check" disabled>Check my flags</button><div class="fb" hidden role="status"></div>`;
+    const cnt = $('.act-meta span', box), btn = $('[data-a="check"]', box);
+    let locked = false;
+    $('.hunt', box).addEventListener('click', e => {
+      const b = e.target.closest('.hrow[data-k]'); if (!b || locked) return;
+      const on = b.getAttribute('aria-pressed') !== 'true'; b.setAttribute('aria-pressed', String(on)); b.classList.toggle('sel', on);
+      const k = $$('.hrow.sel', box).length; cnt.textContent = k + ' of ' + c.need + ' flagged'; btn.disabled = k === 0;
+    });
+    btn.addEventListener('click', () => {
+      locked = true; btn.hidden = true; let found = 0, fa = 0;
+      c.rows.forEach((r, k) => {
+        const b = $(`.hrow[data-k="${k}"]`, box), sel = b.classList.contains('sel'), w = $(`[data-w="${k}"]`, box);
+        b.disabled = true;
+        if (r.flag && sel) { found++; b.classList.add('found'); }
+        else if (r.flag) b.classList.add('miss');
+        else if (sel) { fa++; b.classList.add('fa'); }
+        if (r.flag || sel) { w.hidden = false; w.innerHTML = `<b>${r.flag ? (sel ? 'Found' : 'Missed') : 'False alarm'}:</b> ${md(r.why)}`; }
+      });
+      const score = clamp((found - fa) / c.need, 0, 1); fin(score);
+      const fb = $('.fb', box); fb.className = 'fb ' + (score >= 0.7 ? 'ok' : 'no');
+      fb.innerHTML = `<span class="v">${found} of ${c.need} found${fa ? ' · ' + fa + ' false alarm' + (fa > 1 ? 's' : '') : ''}</span><div>${md(c.debrief)}</div>`; fb.hidden = false;
+    });
+  },
+  ledger(c, box, done, uid) {
+    const fin = once(done), n = c.tx.length, unit = c.unit || '$';
+    const bal = {}; c.accounts.forEach(([a]) => { bal[a] = 0; });
+    const side = Object.fromEntries(c.accounts);
+    const fmtB = v => (v < 0 ? '−' : '') + unit.replace('k', '') + nf(Math.abs(v), Math.abs(v) % 1 ? 1 : 0) + (unit.includes('k') ? 'k' : '');
+    let k = 0, first = 0;
+    function render() {
+      if (k >= n) return summary();
+      const tx = c.tx[k]; let tries = 0;
+      const grp = { A: 'Assets', L: 'Liabilities', E: 'Equity' }; let last = '';
+      box.innerHTML = `<div class="act-meta"><span>Transaction ${k + 1} of ${n}</span><span>${first} right first time</span></div><div class="tx">${md(tx.x)}</div><div class="lrows"></div><div class="balbar" aria-live="polite"></div><div class="fb" hidden role="status"></div><div class="btn-row"><button type="button" class="btn primary" data-a="post">Post entry</button><button type="button" class="btn" data-a="show" hidden>Show answer</button></div>`;
+      const lr = $('.lrows', box), ctl = {};
+      c.accounts.forEach(([a, s], j) => {
+        if (s !== last) { lr.insertAdjacentHTML('beforeend', `<div class="agrp eyebrow">${grp[s]}</div>`); last = s; }
+        const row = document.createElement('div'); row.className = 'lrow';
+        row.innerHTML = `<span class="an">${esc(a)}<small>balance ${fmtB(bal[a])}</small></span>`;
+        const inp = sgnInput(uid + '-' + k + '-' + j, ''); row.appendChild(inp); lr.appendChild(row); ctl[a] = { inp, row };
+      });
+      const bb = $('.balbar', box), fb = $('.fb', box);
+      const sums = () => { let dA = 0, dLE = 0, any = false; c.accounts.forEach(([a, s]) => { const v = ctl[a].inp.get() || 0; if (v) any = true; if (s === 'A') dA += v; else dLE += v; }); return { dA, dLE, any }; };
+      const paintBal = () => { const { dA, dLE, any } = sums(), ok = any && Math.abs(dA - dLE) < 1e-9; bb.className = 'balbar' + (any ? (ok ? ' ok' : ' no') : ''); bb.innerHTML = `<span>Δ assets <b>${sgn(dA)}</b></span><span>${any ? (ok ? '= ' + I.check : '≠') : '='}</span><span>Δ liab. + equity <b>${sgn(dLE)}</b></span>`; };
+      lr.addEventListener('input', paintBal); paintBal();
+      const post = (shown) => {
+        c.accounts.forEach(([a]) => { const v = tx.e[a] || 0; bal[a] += v; ctl[a].inp.lock(); ctl[a].row.classList.remove('no'); if (v) ctl[a].row.classList.add('ok'); });
+        if (!shown && tries === 0) first++;
+        fb.className = 'fb ok'; fb.innerHTML = `<span class="v">${shown ? 'Answer posted' : tries ? 'Posted' : 'Posted first time'}</span><div>${md(tx.why)}</div>`; fb.hidden = false;
+        $('.btn-row', box).innerHTML = `<button type="button" class="btn primary block" data-a="next">${k === n - 1 ? 'See the balance sheet' : 'Next transaction'}</button>`;
+        $('[data-a="next"]', box).addEventListener('click', () => { k++; render(); $('.stage') && ($('.stage').scrollTop = 0); });
+        requestAnimationFrame(() => fb.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+      };
+      $('.btn-row', box).addEventListener('click', e => {
+        const a = e.target.closest('[data-a]'); if (!a) return;
+        if (a.dataset.a === 'show') { c.accounts.forEach(([ac]) => { const v = tx.e[ac] || 0; if (v) ctl[ac].inp.set(v); else { const i = $('input', ctl[ac].inp); i.value = ''; } }); paintBal(); tries++; post(true); return; }
+        if (a.dataset.a !== 'post') return;
+        const { dA, dLE, any } = sums();
+        if (!any) { toast('Enter the change in at least two accounts'); return; }
+        let wrong = 0;
+        c.accounts.forEach(([ac]) => { const v = ctl[ac].inp.get() || 0, ok = Math.abs(v - (tx.e[ac] || 0)) < 0.011; ctl[ac].row.classList.toggle('no', !ok); if (!ok) wrong++; });
+        if (!wrong) { post(false); return; }
+        tries++;
+        const hint = tx.hint || 'Every entry keeps assets = liabilities + equity. Which accounts does this transaction really touch?';
+        fb.className = 'fb no'; fb.innerHTML = `<span class="v">Not yet</span><div>${Math.abs(dA - dLE) > 1e-9 ? `It doesn’t balance: assets ${sgn(dA)} vs liabilities + equity ${sgn(dLE)}.` : `It balances, but ${wrong} account${wrong > 1 ? 's are' : ' is'} off (marked red).`} ${md(hint)}</div>`; fb.hidden = false;
+        $('[data-a="show"]', box).hidden = false;
+      });
+    }
+    function summary() {
+      fin(first / n);
+      const sec = s => c.accounts.filter(([, x]) => x === s);
+      const tot = s => sec(s).reduce((t, [a]) => t + bal[a], 0);
+      const block = (s, label) => `<div class="blk"><h4>${label}</h4>${sec(s).map(([a]) => `<div class="ln"><span>${esc(a)}</span><span>${fmtB(bal[a])}</span></div>`).join('')}<div class="ln tot"><span>Total ${label.toLowerCase()}</span><span>${fmtB(tot(s))}</span></div></div>`;
+      box.innerHTML = `<div class="kpis"><div class="kpi hl"><div class="l">Right first time</div><div class="v">${first}/${n}</div></div><div class="kpi"><div class="l">Assets = L + E</div><div class="v">${fmtB(tot('A'))} = ${fmtB(tot('L') + tot('E'))}</div></div></div><div class="stmt">${block('A', 'Assets')}${block('L', 'Liabilities')}${block('E', 'Equity')}</div><p class="sub">Your ending balance sheet. Every entry kept it in balance.</p>`;
+    }
+    render();
+  },
+  lab(c, box, done, uid) {
+    const fin = once(done), n = c.tasks.length, got = new Set(); let armed = false;
+    box.innerHTML = `<ol class="tasks">${c.tasks.map((t, j) => `<li data-j="${j}"><span class="ti">${I.check}</span><div><div class="tt">${md(t.x)}</div>${t.hint ? `<button type="button" class="hint-btn" data-h="${j}">Hint</button><div class="thint" hidden>${md(t.hint)}</div>` : ''}</div></li>`).join('')}</ol><div class="act-meta"><span class="lab-count">0 of ${n} tasks done</span><button type="button" class="hint-btn" data-a="skip">Skip lab</button></div><div class="lab-tool"></div><div class="fb ok" hidden role="status"></div>`;
+    const finish = skipped => { fin(got.size / n); const fb = $('.fb', box); fb.innerHTML = `<span class="v">${skipped ? 'Debrief' : 'Lab complete'}</span><div>${md(c.debrief)}</div>`; fb.hidden = false; $('[data-a="skip"]', box).hidden = true; };
+    box.addEventListener('click', e => {
+      const h = e.target.closest('[data-h]'); if (h) { h.nextElementSibling.hidden = false; h.hidden = true; return; }
+      if (e.target.closest('[data-a="skip"]')) finish(true);
+    });
+    TOOLS[c.tool].render($('.lab-tool', box), uid, st => {
+      if (!armed) return;
+      c.tasks.forEach((t, j) => {
+        if (got.has(j)) return; let ok = false; try { ok = !!t.test(st); } catch (err) { ok = false; }
+        if (ok) { got.add(j); $(`li[data-j="${j}"]`, box).classList.add('done'); toast('Task ' + (j + 1) + ' done'); }
+      });
+      $('.lab-count', box).textContent = got.size + ' of ' + n + ' tasks done';
+      if (got.size === n) finish(false);
+    }, c.init || {});
+    armed = true;
+  }
+};
+
 /* ---------- card player (lessons, quizzes, reviews) ---------- */
-const LABELS = { concept: 'Concept', example: 'Worked example', mistake: 'Common mistake', case: 'Real-world case', check: 'Quick check', tool: 'Interactive' };
+const LABELS = { concept: 'Concept', example: 'Worked example', mistake: 'Common mistake', case: 'Real-world case', check: 'Quick check', tool: 'Interactive', sort: 'Sort it', arrows: 'Trace it', build: 'Build it', hunt: 'Investigate', ledger: 'Book it', lab: 'Lab' };
 function buildCard(c, i) {
   const el = document.createElement('article'); el.className = 'card k-' + c.t;
   let h = `<span class="chip ${c.t}">${LABELS[c.t] || esc(c.t)}</span>`;
@@ -1171,6 +1701,13 @@ function buildCard(c, i) {
     if (c.src) h += `<div class="eyebrow">${esc(c.src)}</div>`;
     el.innerHTML = h;
     el.appendChild(questionEl(c.q, ok => onAnswer(i, c.q, ok)));
+    return el;
+  }
+  if (ACT[c.t]) {
+    h = `<span class="chip act">${LABELS[c.t]}</span>` + (c.h ? `<h3>${md(c.h)}</h3>` : '') + (c.b ? `<div class="body act-b">${md(c.b)}</div>` : '');
+    el.innerHTML = h; el.classList.add('k-act');
+    const box = document.createElement('div'); box.className = 'noswipe act'; el.appendChild(box);
+    ACT[c.t](c, box, score => onAnswer(i, { id: c.id, act: true }, score), 'a' + (++qn));
     return el;
   }
   if (c.h) h += `<h3>${md(c.h)}</h3>`;
@@ -1210,8 +1747,13 @@ function player(cfg) {
   stage.addEventListener('pointercancel', () => { sx = null; });
   showCard(P.idx, 0);
 }
-function answered(i) { const c = P.cfg.cards[i]; if (c.t !== 'check') return true; return P.ans[i] !== undefined || !!(P.cfg.known && P.cfg.known(c.q)); }
-function onAnswer(i, q, ok) { if (!P) return; if (P.ans[i] === undefined) { P.ans[i] = ok; P.cfg.onAnswer(q, ok); } updateNav(); }
+function answered(i) {
+  const c = P.cfg.cards[i];
+  if (c.t === 'check') return P.ans[i] !== undefined || !!(P.cfg.known && P.cfg.known(c.q));
+  if (ACT[c.t]) return P.ans[i] !== undefined || !!(P.cfg.known && P.cfg.known({ id: c.id, act: true }));
+  return true;
+}
+function onAnswer(i, q, res) { if (!P) return; if (P.ans[i] === undefined) { P.ans[i] = q.act ? res >= 0.7 : res; P.cfg.onAnswer(q, res); } updateNav(); }
 function showCard(i, dir) {
   const c = P.cfg.cards[i]; P.idx = i;
   if (P.cfg.onShow) P.cfg.onShow(i, c);
@@ -1235,13 +1777,13 @@ function updateNav() {
   $('#plPrev').disabled = i === 0;
   const nx = $('#plNext');
   if (c.t === 'done') { nx.textContent = P.cfg.doneAction().label; nx.disabled = false; }
-  else if (!answered(i)) { nx.textContent = 'Answer to continue'; nx.disabled = true; }
+  else if (!answered(i)) { nx.textContent = ACT[c.t] ? 'Finish the activity' : 'Answer to continue'; nx.disabled = true; }
   else { nx.textContent = i === n - 2 ? 'Finish' : 'Next'; nx.disabled = false; }
 }
 function next() {
   if (!P) return; const i = P.idx, c = P.cfg.cards[i];
   if (c.t === 'done') { P.cfg.doneAction().run(); return; }
-  if (!answered(i)) { toast('Answer to continue'); return; }
+  if (!answered(i)) { toast(ACT[c.t] ? 'Finish the activity to continue' : 'Answer to continue'); return; }
   if (i < P.cfg.cards.length - 1) showCard(i + 1, 1);
 }
 function prev() { if (P && P.idx > 0) showCard(P.idx - 1, -1); }
@@ -1251,7 +1793,7 @@ function closeCurrent() { back(ovParent); }
 function openLesson(lid) {
   const { m, l, i } = LESSONS[lid];
   const cards = [{ t: 'intro' }, ...l.cards, { t: 'done' }];
-  const nChecks = l.cards.filter(c => c.t === 'check').length;
+  const nChecks = l.cards.filter(c => c.t === 'check').length, nActs = l.cards.filter(c => ACT[c.t]).length;
   const sess = { xp: 0, missed: 0 };
   let start = 0;
   if (S.resume && S.resume.les === lid && S.resume.idx < cards.length - 1) start = S.resume.idx;
@@ -1259,27 +1801,31 @@ function openLesson(lid) {
   ovClose = () => { if (S.resume && S.resume.les === lid) { S.resume.open = false; save(); } };
   player({
     title: lessonNo(m, i) + ' · ' + l.title, cards, start, parent: 'module-' + m.id,
-    known: q => !!S.answered[q.id],
+    known: q => q.act ? S.acts[q.id] !== undefined : !!S.answered[q.id],
     onShow(idx, c) {
       S.resume = { les: lid, idx, open: true, ts: Date.now() };
       if (c.t === 'done' && !lessonDone(lid)) { S.lessons[lid] = { done: true, at: Date.now() }; sess.xp += 25; addXP(25, true); toast('Lesson complete · +25 XP'); }
       save();
     },
     onAnswer(q, ok) {
+      if (q.act) {
+        if (S.acts[q.id] === undefined) { S.acts[q.id] = Math.round(ok * 100); const xp = 5 + Math.round(15 * ok); sess.xp += xp; addXP(xp); } else { touchDay(); save(); }
+        return;
+      }
       tally(ok);
       if (S.answered[q.id] === undefined) { S.answered[q.id] = { c: ok, t: Date.now() }; if (ok) { sess.xp += 10; addXP(10); } }
       if (!ok) { srsMiss(q.id); sess.missed++; }
       save(); refreshChrome();
     },
-    intro: () => `<span class="chip intro">Lesson ${lessonNo(m, i)} · ${l.minutes} min</span><h3>${esc(l.title)}</h3>
+    intro: () => `<span class="chip intro">${l.lab ? 'Lab' : 'Lesson'} ${lessonNo(m, i)} · ${l.minutes} min</span><h3>${esc(l.title)}</h3>
       <div><div class="eyebrow" style="margin-bottom:6px">You’ll learn</div><ul class="goals">${(l.goals || []).map(g => `<li>${esc(g)}</li>`).join('')}</ul></div>
-      <p class="sub">${l.cards.length} cards · ${nChecks} quick checks${lessonDone(lid) ? ' · completed before' : ''}</p>
+      <p class="sub">${nActs} hands-on activit${nActs === 1 ? 'y' : 'ies'} · ${nChecks} quick check${nChecks === 1 ? '' : 's'}${lessonDone(lid) ? ' · completed before' : ''}</p>
       <div class="src"><b>Sources</b>${esc(l.sources)}</div>
       <p class="hint">Swipe left or tap Next</p>`,
     done: () => {
       const vals = Object.values(P.ans), right = vals.filter(Boolean).length;
       return `<span class="chip check">Lesson complete</span><h3>${esc(l.title)}</h3>
-      <div class="kpis"><div class="kpi"><div class="l">Checks right</div><div class="v">${right}/${vals.length}</div></div><div class="kpi hl"><div class="l">XP this session</div><div class="v">+${sess.xp}</div></div><div class="kpi"><div class="l">Sent to review</div><div class="v">${sess.missed}</div></div></div>
+      <div class="kpis"><div class="kpi"><div class="l">Activities and checks passed</div><div class="v">${right}/${vals.length}</div></div><div class="kpi hl"><div class="l">XP this session</div><div class="v">+${sess.xp}</div></div><div class="kpi"><div class="l">Sent to review</div><div class="v">${sess.missed}</div></div></div>
       ${sess.missed ? '<p class="sub">Missed questions come back in your review queue in about 10 minutes, then at growing intervals.</p>' : ''}
       ${nxt ? `<p class="sub">Up next: <strong>${lessonNo(m, i + 1)} ${esc(nxt.title)}</strong></p>` : `<p class="sub">That was the last lesson in Module ${m.num}. The mastery quiz is next.</p>`}
       <div class="src"><b>Sources</b>${esc(l.sources)}</div>`;
@@ -1406,7 +1952,7 @@ function viewModule(m) {
     const inProg = S.resume && LESSONS[S.resume.les] && LESSONS[S.resume.les].m === m && !lessonDone(S.resume.les) ? S.resume.les : null;
     body = `<div class="btn-row"><button class="btn" type="button" data-go="formulas-${m.id}">${I.sigma}Formula sheet</button><button class="btn" type="button" data-go="quiz-${m.id}">${I.target}Mastery quiz</button></div>
     <div class="section-h"><h2 class="h2">Lessons</h2><span class="sub">${st.done}/${st.total} done</span></div>
-    <div class="list">${m.lessons.map((l, i) => { const d = lessonDone(l.id), p = l.id === inProg; return `<button class="row" type="button" data-go="lesson-${l.id}"><span class="idx">${lessonNo(m, i)}</span><div class="main"><div class="t">${esc(l.title)}</div><div class="s">${l.minutes} min · ${l.cards.length} cards${p ? ' · in progress' : ''}</div></div><span class="check-ic${d ? ' done' : p ? ' part' : ''}">${d ? I.check : ''}</span></button>`; }).join('')}
+    <div class="list">${m.lessons.map((l, i) => { const d = lessonDone(l.id), p = l.id === inProg; return `<button class="row" type="button" data-go="lesson-${l.id}"><span class="idx">${lessonNo(m, i)}</span><div class="main"><div class="t">${esc(l.title)}</div><div class="s">${l.lab ? '<span class="tag acc" style="padding:3px 6px;margin-right:6px">Lab</span>' : ''}${l.minutes} min · ${l.cards.filter(c => ACT[c.t]).length} activities${p ? ' · in progress' : ''}</div></div><span class="check-ic${d ? ' done' : p ? ' part' : ''}">${d ? I.check : ''}</span></button>`; }).join('')}
     <button class="row" type="button" data-go="quiz-${m.id}"><span class="idx">${I.target}</span><div class="main"><div class="t">Mastery quiz</div><div class="s">${m.quiz.length} questions · pass 80%${st.quiz ? ' · best ' + st.quiz.best + '%' : ''}</div></div><span class="check-ic${st.passed ? ' done' : ''}">${st.passed ? I.check : ''}</span></button></div>`;
   } else {
     body = `<div class="note"><b>Coming soon</b>This module’s lessons are written in a later update. Here is the lesson plan.</div>
@@ -1631,9 +2177,9 @@ const TOOLS = {
     blurb: 'Push one transaction through the income statement, cash flow statement and balance sheet.',
     how: 'Net income links the income statement to the cash flow statement and retained earnings. The net change in cash becomes the cash line on the balance sheet. The check at the bottom must always balance.',
     src: 'CFA Program Curriculum Level I (Financial Reporting Mechanics); Rosenbaum & Pearl, Investment Banking.',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
-      const ev = picker(uid, 'ev', 'Event', Object.entries(EVENTS).map(([k, v]) => [k, v.label]), 'dep', draw);
+      const ev = picker(uid, 'ev', 'Event', Object.entries(EVENTS).map(([k, v]) => [k, v.label]), (init && init.ev) || 'dep', draw);
       const amt = slider(uid, 'amt', 'Amount', { min: 5, max: 100, step: 5, value: 10, fmt: v => '$' + v }, draw);
       const tax = slider(uid, 'tax', 'Tax rate', { min: 0, max: 40, step: 1, value: 25, fmt: v => v + '%' }, draw);
       ctr.append(ev, amt, tax);
@@ -1653,6 +2199,7 @@ const TOOLS = {
         </div>
         <div class="balance">${ok ? I.check : ''}<span>${ok ? 'Balanced' : 'Out of balance'}: Δ assets <b>${sgn(TA)}</b> = Δ liabilities + equity <b>${sgn(TLE)}</b></span></div>
         <p class="tool-note">${esc(e.note)} Assumes taxes are paid in cash in the same period.</p>`;
+        if (onState) onState({ ev: ev.get(), A, t, NI, cash, TA, dE: sum(eq) });
       }
       draw();
     }
@@ -1663,7 +2210,7 @@ const TOOLS = {
     blurb: 'See how DSO, DIO and DPO set the cash tied up in working capital.',
     how: 'The top bar is the operating cycle: days goods sit in inventory, then days until customers pay. The middle bar is how long you take to pay suppliers. The gap between them is the cash conversion cycle, which you must finance.',
     src: 'CFA Program Curriculum Level I (Financial Analysis Techniques; working capital); Berk & DeMarzo, Corporate Finance (Working Capital Management).',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const rev = slider(uid, 'rev', 'Annual revenue', { min: 100, max: 5000, step: 50, value: 1000, fmt: v => '$' + v.toLocaleString('en-US') + 'm' }, draw);
       const cg = slider(uid, 'cogs', 'COGS as % of revenue', { min: 20, max: 90, step: 1, value: 60, fmt: v => v + '%' }, draw);
@@ -1685,6 +2232,68 @@ const TOOLS = {
         out.innerHTML = kpis([['Cash conversion cycle', ccc + ' days', true], ['Operating working capital', money(owc * 1e6), true], ['Receivables (AR)', money(AR * 1e6)], ['Inventory', money(INV * 1e6)], ['Payables (AP)', money(AP * 1e6)], ['Cash per day of DSO', money(R / 365 * 1e6)]])
           + `<div class="chart-box">${svg}</div>`
           + `<p class="tool-note">${ccc < 0 ? 'Negative cycle: suppliers are financing your operations. That float shrinks if growth stalls.' : `Cutting DSO by 5 days would release about ${money(R / 365 * 5 * 1e6)}; stretching DPO by 5 days would release about ${money(C / 365 * 5 * 1e6)}.`} Uses period-end balances and a 365-day year.</p>`;
+        if (onState) onState({ rev: R, cg: cg.get(), dso: s, dio: i, dpo: p, ccc, owc });
+      }
+      draw();
+    }
+  },
+
+  depreciation: {
+    title: 'Depreciation Methods', mod: 'm1',
+    blurb: 'Straight-line vs double-declining balance: same asset, different earnings path.',
+    how: 'Both lines start at cost and end at salvage. A steeper early drop means a bigger early expense and lower early profit. Total depreciation over the life is identical; only the timing moves.',
+    src: 'CFA Program Curriculum Level I (“Analysis of Long-Term Assets”); Berk & DeMarzo, Corporate Finance.',
+    render(root, uid, onState, init) {
+      const [ctr, out] = toolFrame(root);
+      const cost = slider(uid, 'cost', 'Cost', { min: 50, max: 200, step: 10, value: 100, fmt: v => '$' + v + 'm' }, draw);
+      const sal = slider(uid, 'sal', 'Salvage value', { min: 0, max: 30, step: 1, value: 10, fmt: v => '$' + v + 'm' }, draw);
+      const life = slider(uid, 'life', 'Useful life', { min: 3, max: 20, step: 1, value: 10, fmt: v => v + ' y' }, draw);
+      ctr.append(cost, sal, life);
+      function draw() {
+        const C = cost.get(), Sv = Math.min(sal.get(), C), L = life.get(), sl = (C - Sv) / L;
+        const slBV = [[0, C]], ddBV = [[0, C]], dd = []; let bv = C;
+        for (let t = 1; t <= L; t++) { let d = t === L ? bv - Sv : Math.min(2 / L * bv, bv - Sv); d = Math.max(0, d); bv -= d; dd.push(d); ddBV.push([t, bv]); slBV.push([t, C - sl * t]); }
+        out.innerHTML = kpis([['Straight-line, each year', '$' + nf(sl, 2) + 'm', true], ['Double-declining, year 1', '$' + nf(dd[0], 2) + 'm', true], ['Year-1 profit gap', '$' + nf(dd[0] - sl, 2) + 'm'], ['Total over life (both)', '$' + nf(C - Sv, 0) + 'm']])
+          + `<div class="chart-box">${chart({ x: [0, L], y: [0, C * 1.05], series: [{ pts: ddBV, c: 'c2' }, { pts: slBV, c: 'c1' }], pts: [{ x: L, y: Sv, f: 'f5', label: 'Salvage', side: 'l', dy: -8 }], xf: v => v + 'y', yf: v => '$' + Math.round(v), xl: 'Years', yl: 'Book value', label: 'Book value under each method' })}${legend([['c1', 'Straight-line'], ['c2', 'Double-declining balance']])}</div>`
+          + `<div class="fx">SL = (Cost − Salvage) / Life &nbsp;·&nbsp; DDB<sub><i>t</i></sub> = (2 / Life) × BV<sub><i>t</i>−1</sub></div><p class="tool-note">DDB stops at salvage; the final year takes book value down to salvage.</p>`;
+        if (onState) onState({ cost: C, salvage: Sv, life: L, sl1: sl, ddb1: dd[0] });
+      }
+      draw();
+    }
+  },
+
+  quarter: {
+    title: 'Make the Quarter', mod: 'm1',
+    blurb: 'Pull earnings-management levers to hit consensus, and see the footprints analysts look for.',
+    how: 'EPS responds to every lever. The red-flag panel shows what a quality-of-earnings analyst would notice in the same quarter. Stylized company: book-only choices (asset lives, reserves, capitalization) are assumed not to change cash taxes.',
+    src: 'CFA Program Curriculum (“Financial Reporting Quality”, “Evaluating Quality of Financial Reports”); SEC v. Dunlap et al. (Sunbeam, 2001); SEC v. WorldCom, Inc. (2002).',
+    render(root, uid, onState) {
+      const [ctr, out] = toolFrame(root);
+      const X = slider(uid, 'x', 'Pull sales forward (ship early, bill now)', { min: 0, max: 100, step: 5, value: 0, fmt: v => '$' + v + 'm' }, draw);
+      const E = slider(uid, 'e', 'Extend asset useful lives', { min: 0, max: 50, step: 5, value: 0, fmt: v => '+' + v + '%' }, draw);
+      const R = slider(uid, 'r', 'Release bad-debt reserve', { min: 0, max: 20, step: 1, value: 0, fmt: v => '$' + v + 'm' }, draw);
+      const Cp = slider(uid, 'c', 'Capitalize development costs', { min: 0, max: 40, step: 5, value: 0, fmt: v => '$' + v + 'm' }, draw);
+      const D = slider(uid, 'd', 'Stretch supplier payments', { min: 0, max: 20, step: 1, value: 0, fmt: v => '+' + v + ' days' }, draw);
+      ctr.append(X, E, R, Cp, D);
+      function draw() {
+        const x = X.get(), e = E.get(), r = R.get(), c = Cp.get(), d = D.get();
+        const rev = 1000 + x, cogs = 600 + 0.6 * x, opex = 250 - r - c, da = 60 / (1 + e / 100);
+        const ni = (rev - cogs - opex - da) * 0.75, eps = ni / 100;
+        const cfo = 77.5 - 0.1 * x + c + 600 / 91 * d, capex = 70 + c, fcf = cfo - capex;
+        const conv = cfo / ni, dso = (300 + x) / rev * 91, allow = (18 - r) / (300 + x), dac = da / capex;
+        const F = [
+          [dso - 27.3 >= 2, 'DSO up ' + nf(dso - 27.3, 1) + ' days', 'Receivables outrunning sales: pulled-forward revenue (Sunbeam’s bill-and-hold).'],
+          [0.06 - allow >= 0.005, 'Reserve coverage ' + pct(allow, 1) + ' (was 6.0%)', 'Allowance falling against receivables: a reserve release is propping up profit.'],
+          [dac < 0.75, 'D&A only ' + nf(dac, 2) + '× capex', 'Depreciation shrinking relative to investment: longer lives or capitalized costs.'],
+          [c > 0, '$' + c + 'm of costs capitalized', 'A new capitalization policy moves costs out of the P&L (WorldCom’s method).'],
+          [conv < 0.9, 'Cash conversion ' + nf(conv, 2) + '×', 'Earnings not backed by operating cash.'],
+          [d >= 5, 'Payables stretched ' + d + ' days', 'CFO flattered by paying suppliers late. It reverses.']
+        ];
+        const on = F.filter(f => f[0]).length, beat = eps >= 0.8 - 1e-9;
+        out.innerHTML = `<div class="kpis"><div class="kpi hl"><div class="l">EPS vs $0.80 consensus</div><div class="v">$${nf(eps, 3)} <span class="tag ${beat ? 'ok' : ''}" style="vertical-align:middle">${beat ? 'Beat' : 'Miss'}</span></div></div><div class="kpi"><div class="l">Net income</div><div class="v">$${nf(ni, 1)}m</div></div><div class="kpi"><div class="l">Cash from operations</div><div class="v">$${nf(cfo, 1)}m</div></div><div class="kpi"><div class="l">Free cash flow</div><div class="v">$${nf(fcf, 1)}m</div></div><div class="kpi"><div class="l">Cash conversion</div><div class="v">${nf(conv, 2)}×</div></div><div class="kpi"><div class="l">Red flags tripped</div><div class="v" style="color:var(${on ? '--bad' : '--good'})">${on} of 6</div></div></div>
+          <div class="flags"><div class="eyebrow">What the analyst sees</div>${F.map(f => `<div class="flag${f[0] ? ' on' : ''}"><span class="fd"></span><div><strong>${f[0] ? esc(f[1]) : 'Clear'}</strong>${f[0] ? `<div class="sub">${esc(f[2])}</div>` : `<span class="sub"> · ${esc(f[2].split(':')[0])}</span>`}</div></div>`).join('')}</div>
+          <p class="tool-note">Honest quarter: revenue $1,000m, EBIT $90m, net income $67.5m, 100m shares. Pulled-forward sales carry a 40% gross margin and reverse next quarter. Note that capitalizing costs raises CFO but leaves free cash flow unchanged.</p>`;
+        if (onState) onState({ eps, conv, flags: on, ni, cfo });
       }
       draw();
     }
@@ -1695,7 +2304,7 @@ const TOOLS = {
     blurb: 'Compound vs simple growth, compounding frequency, EAR and the Rule of 72.',
     how: 'The gap between the two lines is interest earned on interest. Raising the frequency raises the effective annual rate (EAR), with diminishing returns as it approaches continuous compounding.',
     src: 'Berk & DeMarzo, Corporate Finance (Time Value of Money; Interest Rates); CFA Program Curriculum Level I, Quantitative Methods.',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const pv = slider(uid, 'pv', 'Starting amount', { min: 1000, max: 100000, step: 1000, value: 10000, fmt: v => '$' + v.toLocaleString('en-US') }, draw);
       const r = slider(uid, 'r', 'Annual rate (APR)', { min: 0, max: 20, step: 0.25, value: 8, fmt: v => nf(v, 2) + '%' }, draw);
@@ -1723,7 +2332,7 @@ const TOOLS = {
     blurb: 'Five-year FCFF build with a Gordon growth terminal value, and a WACC × growth grid.',
     how: 'Watch the terminal value bar: it is usually most of the value, which is why small changes in WACC or long-run growth swing the answer. The grid shows enterprise value as WACC and terminal growth move by 50 bp steps.',
     src: 'Koller, Goedhart & Wessels, Valuation (McKinsey & Company); Damodaran, Investment Valuation; CFA Program Curriculum Level II (Free Cash Flow Valuation).',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const f0 = slider(uid, 'f0', 'Current FCFF', { min: 10, max: 500, step: 10, value: 100, fmt: v => '$' + v + 'm' }, draw);
       const g1 = slider(uid, 'g1', 'FCFF growth, years 1–5', { min: -5, max: 25, step: 0.5, value: 8, fmt: v => nf(v, 1) + '%' }, draw);
@@ -1753,7 +2362,7 @@ const TOOLS = {
     blurb: 'The price-yield curve, its duration tangent and the convexity gap between them.',
     how: 'The straight line is the duration approximation at today’s yield. For an option-free bond the curve always sits above it: that gap is convexity, and it grows with the size of the yield move.',
     src: 'Fabozzi, Bond Markets, Analysis, and Strategies; CFA Program Curriculum Level I, Fixed Income.',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const c = slider(uid, 'c', 'Annual coupon (paid semiannually)', { min: 0, max: 12, step: 0.25, value: 5, fmt: v => nf(v, 2) + '%' }, draw);
       const n = slider(uid, 'n', 'Years to maturity', { min: 1, max: 30, step: 1, value: 10, fmt: v => v + ' y' }, draw);
@@ -1778,7 +2387,7 @@ const TOOLS = {
     blurb: 'Compare the duration estimate, duration plus convexity, and full repricing for a yield shock.',
     how: 'For small shocks all three agree. As the shock grows, duration alone overstates losses when yields rise and understates gains when they fall. Adding the convexity term closes most of the gap.',
     src: 'Fabozzi, Bond Markets, Analysis, and Strategies; CFA Program Curriculum Level I, Fixed Income (yield-based bond duration and convexity).',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const c = slider(uid, 'c', 'Annual coupon', { min: 0, max: 12, step: 0.25, value: 4, fmt: v => nf(v, 2) + '%' }, draw);
       const n = slider(uid, 'n', 'Years to maturity', { min: 1, max: 30, step: 1, value: 20, fmt: v => v + ' y' }, draw);
@@ -1803,7 +2412,7 @@ const TOOLS = {
     blurb: 'Change the correlation and watch diversification bend the risk-return curve.',
     how: 'At correlation +1 the portfolios lie on a straight line between the assets: no diversification benefit. Lower correlation bows the curve to the left. At −1 a zero-risk mix exists. The bold segment above the minimum-variance point is the efficient frontier.',
     src: 'Bodie, Kane & Marcus, Investments (Optimal Risky Portfolios); Markowitz (1952); CFA Program Curriculum Level I, Portfolio Management.',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const ma = slider(uid, 'ma', 'Asset A expected return', { min: 1, max: 20, step: 0.5, value: 6, fmt: v => nf(v, 1) + '%' }, draw);
       const sa = slider(uid, 'sa', 'Asset A volatility', { min: 2, max: 40, step: 1, value: 12, fmt: v => v + '%' }, draw);
@@ -1836,7 +2445,7 @@ const TOOLS = {
     blurb: 'Payoff and profit at expiry for calls, puts and a straddle, with breakevens.',
     how: 'The dashed line is the payoff at expiry; the solid line subtracts (or adds) the premium to give profit. Long options cap your loss at the premium; short options cap your gain at the premium.',
     src: 'Hull, Options, Futures, and Other Derivatives (Trading Strategies Involving Options); CFA Program Curriculum Level I, Derivatives.',
-    render(root, uid) {
+    render(root, uid, onState, init) {
       const [ctr, out] = toolFrame(root);
       const STR = {
         lc: ['Long call', (S, K) => Math.max(S - K, 0), 1], sc: ['Short call', (S, K) => -Math.max(S - K, 0), -1],
